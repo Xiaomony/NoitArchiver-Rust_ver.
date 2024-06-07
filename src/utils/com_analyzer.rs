@@ -43,7 +43,7 @@ impl Analyzer {
 
         comlist.push(comm!("modarch", "ma", IdModarch(None)));
         comlist.push(comm!("del", "d", IdDel(None)));
-        comlist.push(comm!("Qdel", "qd", IdQdel(None)));
+        comlist.push(comm!("qdel", "qd", IdQdel(None)));
 
         comlist.push(comm!("usage", "u", IdUsage));
         comlist.push(comm!("favor", "f", IdFavor));
@@ -58,15 +58,52 @@ impl Analyzer {
     }
 
     // 预先分隔、处理字符串
-    fn preprocess_command<'a>(&self, command: &'a str) -> Vec<&'a str> {
-        // 分离命令及其参数
+    fn preprocess_command<'a>(command: &'a str) -> Vec<&'a str> {
+        // 掐头去尾
         let trimmed_command = command.trim();
-        //let re = Regex::new(r#"(\s+)(?<!\\")"#).unwrap();
-        trimmed_command.split(" ").collect()
+
+        //trimmed_command.split(" ").collect()
+        // 分离命令及其参数
+        let mut result = Vec::new();
+        let chars = trimmed_command.chars();
+        let mut start = Some(0);
+        let mut in_quote = false;
+        let mut index:usize = 0;
+        for c in chars.into_iter() {
+            match c {
+                '"' => {
+                    if let Some(start_index) = start {
+                        result.push(&trimmed_command[start_index..index]);
+                        in_quote = false;
+                    } else {
+                        start = Some(index + 1);
+                        in_quote = true;
+                    }
+                }
+                ' ' => {
+                    if !in_quote {
+                        if let Some(start_index) = start {
+                            result.push(&trimmed_command[start_index..index]);
+                            start = None;
+                        }
+                    }
+                }
+                _ => {
+                    if let None = start {
+                        start = Some(index);
+                    }
+                }
+            }
+            index += c.len_utf8();
+        }
+        if let Some(start_index) = start {
+            result.push(&trimmed_command[start_index..trimmed_command.len()])
+        }
+        result
     }
-    
+
     pub fn analyze(&self, command_input: &str) -> CommandID {
-        let parts: Vec<&str> = self.preprocess_command(command_input);
+        let parts: Vec<&str> = Self::preprocess_command(command_input);
         if parts.first() == None {
             return CommandID::IdErrCommand;
         }

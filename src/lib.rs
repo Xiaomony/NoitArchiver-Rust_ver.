@@ -1,14 +1,15 @@
 mod utils;
 
-use utils::out_logger;
+use utils::out_logger::*;
 
 use utils::com_analyzer;
 use utils::commands::{CommandID::*, *};
 use utils::file_manager;
 
-pub struct Manager {
+pub struct Manager/*<T: OutLogger>*/ {
     com_analyzer: com_analyzer::Analyzer,
     file_manager: file_manager::FileManager,
+    //logger: T
 }
 
 impl Manager {

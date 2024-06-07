@@ -30,7 +30,7 @@ macro_rules! output_suc {
     };
 }
 
-trait OutLogger {
+pub trait OutLogger {
     fn otl_print(&self, args: Arguments);
     fn otl_print_err(&self, args: Arguments);
     fn otl_print_warn(&self, args: Arguments);
