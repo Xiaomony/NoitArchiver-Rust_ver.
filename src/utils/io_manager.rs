@@ -30,12 +30,14 @@ macro_rules! output_suc {
     };
 }
 
-pub trait OutLogger {
+pub trait IOManager {
     fn otl_print(&self, args: Arguments);
     fn otl_print_err(&self, args: Arguments);
     fn otl_print_warn(&self, args: Arguments);
     fn otl_print_log(&self, args: Arguments);
     fn otl_print_suc(&self, args: Arguments);
+
+    fn otl_getline(&self) -> String;
 }
 
 struct Error {
