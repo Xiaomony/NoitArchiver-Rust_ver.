@@ -1,4 +1,6 @@
+use serde_json;
 use std::fmt::Arguments;
+
 // -----------------------------------
 #[macro_export]
 macro_rules! out {
@@ -79,17 +81,21 @@ pub trait IOManager {
 
 #[derive(Debug)]
 pub enum Error {
+    None, // 不便构造Clone方法的变体,在Clone时返回None
     CommandError(String),
+    JsonTranslateError(serde_json::Error),
     IoError(std::io::Error),
 }
 
 impl Clone for Error {
     fn clone(&self) -> Self {
         match *self {
-            Error::CommandError(ref msg) => Error::CommandError(msg.clone()),
-            Error::IoError(ref err) => {
-                Error::IoError(std::io::Error::new(err.kind(), err.to_string().as_str()))
+            Self::CommandError(ref msg) => Self::CommandError(msg.clone()),
+            Self::IoError(ref err) => {
+                Self::IoError(std::io::Error::new(err.kind(), err.to_string().as_str()))
             }
+            Self::JsonTranslateError(_) => Self::None,
+            Self::None => Self::None,
         }
     }
 }
@@ -97,8 +103,10 @@ impl Clone for Error {
 impl std::fmt::Display for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match *self {
+            Self::None => write!(f, "None"),        // ***********
             Self::CommandError(ref msg) => write!(f, "[Command Error]\t{}", msg),
             Self::IoError(ref err) => write!(f, "[IoError]\t{}", err),
+            Self::JsonTranslateError(ref err) => write!(f, "[JsonTranslateError]\t{}", err),
         }
     }
 }
@@ -106,8 +114,22 @@ impl std::fmt::Display for Error {
 impl std::error::Error for Error {
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
         match *self {
+            Self::None => None, // **********
             Self::CommandError(_) => None,
             Self::IoError(ref err) => Some(err),
+            Self::JsonTranslateError(ref err) => Some(err),
         }
+    }
+}
+
+impl From<std::io::Error> for Error {
+    fn from(value: std::io::Error) -> Self {
+        Error::IoError(value)
+    }
+}
+
+impl From<serde_json::Error> for Error {
+    fn from(value: serde_json::Error) -> Self {
+        Error::JsonTranslateError(value)
     }
 }
