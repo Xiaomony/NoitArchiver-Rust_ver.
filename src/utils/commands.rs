@@ -1,6 +1,6 @@
 use super::io_manager::Error;
 
-#[derive(Debug,Clone)]
+#[derive(Debug, Clone)]
 pub enum CommandID {
     IdErrCommand(Error),
 
@@ -27,8 +27,8 @@ pub enum CommandID {
 
 #[derive(Clone, Debug)]
 pub struct Save {
-    arch_name: String,
-    arch_note: String,
+    pub arch_name: String,
+    pub arch_note: String,
 }
 
 #[derive(Clone, Debug)]

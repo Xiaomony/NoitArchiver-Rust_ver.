@@ -4,15 +4,28 @@ use crate::{outln, outln_warn};
 use serde::{Deserialize, Serialize};
 use serde_json;
 use std::fs;
+use std::fs::File;
+use std::io::prelude::*;
 use std::io::BufReader;
 use std::path::PathBuf;
 
 #[derive(Serialize, Deserialize, Debug)]
-struct ArchiveInfo {
+pub struct ArchiveInfo {
     name: String,
     note: String,
     date: [usize; 3],
     time: [usize; 3],
+}
+
+impl ArchiveInfo {
+    pub fn new(name: &str, note: &str, date: &[usize; 3], time: &[usize; 3]) -> Self {
+        Self {
+            name: name.to_string(),
+            note: note.to_string(),
+            date: date.clone(),
+            time: time.clone(),
+        }
+    }
 }
 
 struct JsonManager<'a, T: IOManager> {
@@ -38,24 +51,24 @@ impl<'a, T: IOManager> JsonManager<'a, T> {
             logger,
         }
     }
+
+    pub fn get_infos(&self) -> &Vec<ArchiveInfo> {
+        &self.infos
+    }
+
     pub fn load_json(&mut self) -> Result<(), Error> {
-        let f = fs::File::open(&self.path_to_json)?;
+        let f = File::open(&self.path_to_json)?;
         let reader = BufReader::new(f);
         self.infos = serde_json::from_reader(reader)?;
         Ok(())
     }
     pub fn write_json(&self) -> Result<(), Error> {
-        let f = fs::File::open(&self.path_to_json)?;
+        let f = File::create(&self.path_to_json)?;
         serde_json::to_writer_pretty(f, &(self.infos))?;
         Ok(())
     }
-    pub fn infos_push(&mut self, name: String, note: String, date: [usize; 3], time: [usize; 3]) {
-        self.infos.push(ArchiveInfo {
-            name,
-            note,
-            date,
-            time,
-        });
+    pub fn infos_push(&mut self, info: ArchiveInfo) {
+        self.infos.push(info);
     }
     pub fn infos_del(&mut self, index: usize) {
         if index < self.infos.len() && index > 0 {
@@ -103,10 +116,19 @@ impl<'a, T: IOManager> FileManager<'a, T> {
     }
     fn init(&self) -> Result<(), Error> {
         fs::create_dir_all(&self.path_to_archive_forlder)?;
-        fs::File::create(&(self.path_to_infos_json))?;
+        if !self.path_to_infos_json.exists() {
+            let mut f = File::create(&(self.path_to_infos_json))?;
+            f.write_all(b"[\n]")?;
+        }
         Ok(())
     }
     fn get_noita_arch_path() -> Result<String, Error> {
-        Ok("./".to_string())
+        Ok("/home/runner/arch".to_string())
+    }
+
+    pub fn save(&mut self, info: ArchiveInfo) -> Result<(), Error> {
+        self.json_manager.infos_push(info);
+        self.json_manager.write_json()?;
+        Ok(())
     }
 }

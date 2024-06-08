@@ -25,7 +25,7 @@ impl<'a, T: IOManager> Manager<'a, T> {
         }
     }
 
-    pub fn run_command(&self, command_input: &str) {
+    pub fn run_command(&mut self, command_input: &str) {
         let id = self.com_analyzer.analyze(command_input);
         match id {
             IdErrCommand(err) => outln_warn!(self.logger, "{}", err),
@@ -65,8 +65,15 @@ impl<'a, T: IOManager> Manager<'a, T> {
         out_log!(self.logger, "退出程序");
     }
 
-    fn save(&self, opt: Option<Save>) {
+    fn save(&mut self, opt: Option<Save>) {
         if let Some(para) = opt {
+            let info = file_manager::ArchiveInfo::new(
+                &para.arch_name,
+                &para.arch_note,
+                &[0, 0, 0],
+                &[0, 0, 0],
+            );
+            self.file_manager.save(info).unwrap();
         } else {
         }
         out_suc!(self.logger, "保存成功");
