@@ -1,17 +1,29 @@
-struct _ArchiveInfos {
-    x: i32,
+struct ArchiveInfo {
+    name: String,
+    note: String,
+    date: [usize; 3],
+    time: [usize; 3],
 }
 
-struct _JsonSaver {
-    x: i32,
+struct JsonManager {
+    infos: Vec<ArchiveInfo>,
+    
 }
 
 pub struct FileManager {
-    _x: i32,
+    json_manager: JsonManager,
+}
+
+impl JsonManager {
+    fn new() -> Self {
+        Self { infos: Vec::new() }
+    }
 }
 
 impl FileManager {
     pub fn new() -> Self {
-        Self { _x: 0 }
+        Self {
+            json_manager: JsonManager::new(),
+        }
     }
 }

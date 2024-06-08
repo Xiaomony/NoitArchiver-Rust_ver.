@@ -77,22 +77,37 @@ pub trait IOManager {
     fn io_cls(&self);
 }
 
-pub struct Error<'a, T: IOManager> {
-    msg: String,
-    logger: &'a T,
+#[derive(Debug)]
+pub enum Error {
+    CommandError(String),
+    IoError(std::io::Error),
 }
 
-impl<'a, T: IOManager> Error<'a, T> {
-    fn new(msg: &str, logger: &'a T) -> Self {
-        Self {
-            msg: msg.to_string(),
-            logger,
+impl Clone for Error {
+    fn clone(&self) -> Self {
+        match *self {
+            Error::CommandError(ref msg) => Error::CommandError(msg.clone()),
+            Error::IoError(ref err) => {
+                Error::IoError(std::io::Error::new(err.kind(), err.to_string().as_str()))
+            }
         }
     }
 }
 
-impl<'a, T: IOManager> std::fmt::Display for Error<'a, T> {
+impl std::fmt::Display for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.msg)
+        match *self {
+            Self::CommandError(ref msg) => write!(f, "[Command Error]\t{}", msg),
+            Self::IoError(ref err) => write!(f, "[IoError]\t{}", err),
+        }
+    }
+}
+
+impl std::error::Error for Error {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        match *self {
+            Self::CommandError(_) => None,
+            Self::IoError(ref err) => Some(err),
+        }
     }
 }

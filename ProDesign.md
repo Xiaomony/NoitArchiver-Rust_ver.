@@ -39,6 +39,6 @@
       - _CommandID(enum 存储分析后的命令的信息)_
     - `FileManager.rs`
       - **_FileManager(拷贝存档、删除文件、调用JsonSaver中各种方法……)_**
-      - **_JsonSaver(只负责存储、读取infos.json)_**
+      - **_JsonManager(只负责存储、读取infos.json)_**
 
-      - **_ArchiveInfos(存储infos.json中加载出的信息)_**
+      - **_ArchiveInfo(存储infos.json中加载出的单个存档的信息，并在JsonSaver中创建Vec\<ArchiveInfo\>存储整个json的内容)_**

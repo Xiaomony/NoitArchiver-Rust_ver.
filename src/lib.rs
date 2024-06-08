@@ -29,7 +29,7 @@ impl<T: IOManager> Manager<T> {
     pub fn run_command(&self, command_input: &str) {
         let id = self.com_analyzer.analyze(command_input);
         match id {
-            IdErrCommand => outln_warn!(self.logger, "未找到命令 {}", 10),
+            IdErrCommand(err) => outln_warn!(self.logger, "{}", err),
             IdClear => self.clear(),
             IdHelp => self.help(),
             IdQuit => self.quit(),

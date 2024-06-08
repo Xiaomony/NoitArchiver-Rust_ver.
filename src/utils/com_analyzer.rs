@@ -1,6 +1,7 @@
 // use regex::Regex;
 
 use super::commands::{CommandID::*, *};
+use super::io_manager::Error;
 
 pub struct ComMap {
     full_name: String,
@@ -104,13 +105,13 @@ impl Analyzer {
     pub fn analyze(&self, command_input: &str) -> CommandID {
         let parts: Vec<&str> = Self::preprocess_command(command_input);
         if parts.first() == None {
-            return CommandID::IdErrCommand;
+            return CommandID::IdErrCommand(Error::CommandError("无命令输入".to_string()));
         }
         let head = parts.first().unwrap().to_string(); // head为所获得的命令
 
         // 闭包：寻找命令
         let find = |input: String| -> CommandID {
-            let mut id = IdErrCommand;
+            let mut id = IdErrCommand(Error::CommandError("未找到命令:".to_string()));
             for com in self.command_list.iter() {
                 if input == com.short_name || input == com.full_name {
                     id = com.id.clone();
