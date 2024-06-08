@@ -5,7 +5,8 @@ mod io_commandline;
 use io_commandline::IOCommandLine;
 
 fn main() {
-    let a = Manager::new(IOCommandLine::new());
+    let logger = IOCommandLine::new();
+    let a = Manager::new(&logger);
     a.run_command("cls");
     a.run_command("save  爽种😊😊😊😊  \"aaa    aaa😍😍😍 阿斯蒂芬\"");
 }

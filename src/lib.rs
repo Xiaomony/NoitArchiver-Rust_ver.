@@ -7,18 +7,17 @@ use utils::io_manager::*;
 
 use std::ops::RangeInclusive;
 
-pub struct Manager<T: IOManager> {
+pub struct Manager<'a, T: IOManager> {
     com_analyzer: com_analyzer::Analyzer,
-    file_manager: file_manager::FileManager,
-    logger: T,
+    file_manager: file_manager::FileManager<'a, T>,
+    logger: &'a T,
     //exit_callback: fn ()
 }
 
-impl<T: IOManager> Manager<T> {
-    pub fn new(logger: T) -> Self {
+impl<'a, T: IOManager> Manager<'a, T> {
+    pub fn new(logger: &'a T) -> Self {
         let com_analyzer = com_analyzer::Analyzer::new();
-        let file_manager = file_manager::FileManager::new();
-
+        let file_manager = file_manager::FileManager::new(logger);
         Self {
             com_analyzer,
             file_manager,
