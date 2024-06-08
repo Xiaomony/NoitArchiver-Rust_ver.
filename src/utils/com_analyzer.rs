@@ -128,12 +128,25 @@ impl Analyzer {
             _ => *opt = None,
         };
 
+        let get_para_modify = |opt: &mut Option<_>| {
+            let result = parts[1].parse::<usize>();
+            if let Ok(index) = result {
+                match parts.len() {
+                    3 => *opt = Some(Modify::new(index-1, parts[2], "")),
+                    len if len>=4 => *opt = Some(Modify::new(index-1, parts[2], parts[3])),
+                    _ => *opt = None
+                }
+            } else {
+                *opt = None
+            }
+        };
+
         let get_para_load = |opt: &mut Option<_>| {
             let index = parts[1].parse::<usize>();
             if let Err(_) = index {
                 *opt = None
             } else {
-                *opt = Some(Load::new(index.unwrap()));
+                *opt = Some(Load::new(index.unwrap()-1));
             }
         };
 
@@ -142,7 +155,7 @@ impl Analyzer {
             if let Err(_) = index {
                 *opt = None
             } else {
-                *opt = Some(Del::new(index.unwrap()));
+                *opt = Some(Del::new(index.unwrap()-1));
             }
         };
 
@@ -154,7 +167,7 @@ impl Analyzer {
             IdLoad(ref mut opt) => get_para_load(&mut *opt),
             IdQload(_) => {}
 
-            IdModarch(ref mut opt) => get_para_save(&mut *opt),
+            IdModarch(ref mut opt) => get_para_modify(&mut *opt),
             IdDel(ref mut opt) => get_para_del(&mut *opt),
             IdQdel => {}
             _ => {}

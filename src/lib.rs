@@ -5,6 +5,7 @@ use utils::commands::{CommandID::*, *};
 use utils::file_manager;
 use utils::io_manager::*;
 
+use chrono::prelude::*;
 use std::ops::RangeInclusive;
 
 pub struct Manager<'a, T: IOManager> {
@@ -27,6 +28,9 @@ impl<'a, T: IOManager> Manager<'a, T> {
 
     pub fn run_command(&mut self, command_input: &str) {
         let id = self.com_analyzer.analyze(command_input);
+        // 获取infos长度
+        let getlen = || self.file_manager.get_archive_infolen();
+
         match id {
             IdErrCommand(err) => outln_warn!(self.logger, "{}", err),
             IdClear => self.clear(),
@@ -40,8 +44,8 @@ impl<'a, T: IOManager> Manager<'a, T> {
             IdQload(ref opt) => {
                 println!("qload {:?}", opt);
             }
-            IdLog => self.log(0..=1),
-            IdSlog => self.log(0..=1),
+            IdLog => self.log(0..=getlen() - 1),
+            IdSlog => self.log(getlen() - 7..=getlen() - 1),
 
             IdModarch(opt) => self.modify_archive(opt),
             IdDel(opt) => self.del(opt),
@@ -55,6 +59,7 @@ impl<'a, T: IOManager> Manager<'a, T> {
 
     fn clear(&self) {
         self.logger.io_cls();
+        // let commands = self.file_manager
     }
 
     fn help(&self) {
@@ -67,19 +72,47 @@ impl<'a, T: IOManager> Manager<'a, T> {
 
     fn save(&mut self, opt: Option<Save>) {
         if let Some(para) = opt {
+            let time = Local::now();
             let info = file_manager::ArchiveInfo::new(
                 &para.arch_name,
                 &para.arch_note,
-                &[0, 0, 0],
-                &[0, 0, 0],
+                [
+                    time.year() as usize,
+                    time.month() as usize,
+                    time.day() as usize,
+                ],
+                [
+                    time.hour() as usize,
+                    time.minute() as usize,
+                    time.second() as usize,
+                ],
             );
             self.file_manager.save(info).unwrap();
         } else {
         }
-        out_suc!(self.logger, "保存成功");
+        outln_suc!(self.logger, "保存成功");
     }
 
-    fn rsave(&self) {}
+    fn rsave(&mut self) {
+        let infos = self.file_manager.get_archive_infos();
+        let last = infos.len() - 1;
+        let time = Local::now();
+        let new_info = file_manager::ArchiveInfo::new(
+            &infos[last].name,
+            &infos[last].note,
+            [
+                time.year() as usize,
+                time.month() as usize,
+                time.day() as usize,
+            ],
+            [
+                time.hour() as usize,
+                time.minute() as usize,
+                time.second() as usize,
+            ],
+        );
+        self.file_manager.replace(last, new_info);
+    }
 
     fn load(&self, opt: Option<Load>) {
         if let Some(para) = opt {
@@ -87,16 +120,44 @@ impl<'a, T: IOManager> Manager<'a, T> {
         }
     }
 
-    fn log(&self, range: RangeInclusive<usize>) {}
+    fn log(&self, range: RangeInclusive<usize>) {
+        let infos = self.file_manager.get_archive_infos();
+        let start = (0 as usize).max(*range.start());
+        let end = ((infos.len() - 1) as usize).min(*range.end());
 
-    fn modify_archive(&self, opt: Option<Save>) {
+        for (index, p) in infos[start..=end].iter().enumerate() {
+            let time_str = format!(
+                "{}-{}-{} {}:{}:{}",
+                p.date[0], p.date[1], p.date[2], p.time[0], p.time[1], p.time[2]
+            );
+            outln_log!(
+                self.logger,
+                "[{}] {}\t{}\t{}",
+                index + 1,
+                time_str,
+                &p.name,
+                &p.note
+            );
+        }
+    }
+
+    fn modify_archive(&mut self, opt: Option<Modify>) {
         if let Some(para) = opt {
+            let old_info = &self.file_manager.get_archive_infos()[para.index];
+            let new_info = file_manager::ArchiveInfo::new(
+                &para.info.arch_name,
+                &para.info.arch_note,
+                old_info.date,
+                old_info.time,
+            );
+            self.file_manager.modify(para.index, new_info);
         } else {
         }
     }
 
-    fn del(&self, opt: Option<Del>) {
+    fn del(&mut self, opt: Option<Del>) {
         if let Some(para) = opt {
+            self.file_manager.del(para.index).unwrap();
         } else {
         }
     }

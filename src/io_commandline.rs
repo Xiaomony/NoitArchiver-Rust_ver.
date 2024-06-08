@@ -14,19 +14,19 @@ impl IOCommandLine {
 
 impl IOManager for IOCommandLine {
     fn io_print(&self, args: Arguments) {
-        println!("{}", args);
+        print!("{}", args);
     }
     fn io_print_err(&self, args: Arguments) {
-        println!("{}", format!("{}", args).red());
+        print!("{}", format!("{}", args).red());
     }
     fn io_print_warn(&self, args: Arguments) {
-        println!("{}", format!("{}", args).yellow());
+        print!("{}", format!("{}", args).yellow());
     }
     fn io_print_log(&self, args: Arguments) {
-        println!("{}", format!("{}", args).blue());
+        print!("{}", format!("{}", args).blue());
     }
     fn io_print_suc(&self, args: Arguments) {
-        println!("{}", format!("{}", args).green());
+        print!("{}", format!("{}", args).green());
     }
 
     fn io_getline(&self) -> String {
@@ -34,7 +34,8 @@ impl IOManager for IOCommandLine {
     }
 
     fn io_cls(&self) {
-        Command::new("clear").status()
-        .expect("Failed to clear screen");
+        Command::new("clear")
+            .status()
+            .expect("Failed to clear screen");
     }
 }

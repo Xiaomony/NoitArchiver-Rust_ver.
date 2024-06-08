@@ -42,3 +42,9 @@
       - **_JsonManager(只负责存储、读取infos.json)_**
 
       - **_ArchiveInfo(存储infos.json中加载出的单个存档的信息，并在JsonSaver中创建Vec\<ArchiveInfo\>存储整个json的内容)_**
+
+## Unsolved Problems
+  目前想到的问题，最初开发阶段不处理：
+  1. 存档文件夹以存档名命名，因此有重名问题、quicksave的存档名如何处理
+  2. Error处理混乱、unwrap()与?随意混用
+  3. 简单函数的inline标注

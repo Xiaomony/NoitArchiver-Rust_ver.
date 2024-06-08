@@ -7,6 +7,11 @@ use io_commandline::IOCommandLine;
 fn main() {
     let logger = IOCommandLine::new();
     let mut a = Manager::new(&logger);
-    a.run_command("cls");
-    a.run_command("save  爽种😊😊😊😊  \"aaa    aaa😍😍😍 阿斯蒂芬\"");
+    //a.run_command("cls");
+    //a.run_command("save  1  \"aaa aaa\"");
+    //a.run_command("save 2 bb");
+    //a.run_command("save 3 cc");
+    a.run_command("del 3");
+    a.run_command("ma 2 xx yy");
+    a.run_command("log");
 }

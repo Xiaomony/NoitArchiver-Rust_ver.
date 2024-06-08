@@ -17,7 +17,7 @@ pub enum CommandID {
     IdLog,
     IdSlog,
 
-    IdModarch(Option<Save>),
+    IdModarch(Option<Modify>),
     IdDel(Option<Del>),
     IdQdel,
 
@@ -32,13 +32,19 @@ pub struct Save {
 }
 
 #[derive(Clone, Debug)]
+pub struct Modify {
+    pub index: usize,
+    pub info: Save,
+}
+
+#[derive(Clone, Debug)]
 pub struct Load {
-    index: usize,
+    pub index: usize,
 }
 
 #[derive(Clone, Debug)]
 pub struct Del {
-    index: usize,
+    pub index: usize,
 }
 
 impl Save {
@@ -52,6 +58,15 @@ impl Save {
         Self {
             arch_name: "".to_string(),
             arch_note: "".to_string(),
+        }
+    }
+}
+
+impl Modify {
+    pub fn new(index: usize, arch_name: &str, arch_note: &str) -> Self {
+        Self {
+            index,
+            info: Save::new(arch_name, arch_note),
         }
     }
 }
