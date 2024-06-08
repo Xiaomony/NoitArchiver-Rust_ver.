@@ -33,7 +33,7 @@ impl Analyzer {
         comlist.push(comm!("quit", "q", IdQuit));
 
         comlist.push(comm!("save", "s", IdSave(None)));
-        comlist.push(comm!("qsave", "qs", IdQsave(None)));
+        comlist.push(comm!("qsave", "qs", IdQsave(Some(Save::get_empty()))));
         comlist.push(comm!("rsave", "rs", IdRsave(None)));
 
         comlist.push(comm!("load", "l", IdLoad(None)));
@@ -43,7 +43,7 @@ impl Analyzer {
 
         comlist.push(comm!("modarch", "ma", IdModarch(None)));
         comlist.push(comm!("del", "d", IdDel(None)));
-        comlist.push(comm!("qdel", "qd", IdQdel(None)));
+        comlist.push(comm!("qdel", "qd", IdQdel));
 
         comlist.push(comm!("usage", "u", IdUsage));
         comlist.push(comm!("favor", "f", IdFavor));
@@ -62,7 +62,6 @@ impl Analyzer {
         // 掐头去尾
         let trimmed_command = command.trim();
 
-        //trimmed_command.split(" ").collect()
         // 分离命令及其参数
         let mut result = Vec::new();
         let chars = trimmed_command.chars();
@@ -156,7 +155,7 @@ impl Analyzer {
 
             IdModarch(ref mut opt) => get_para_save(&mut *opt),
             IdDel(ref mut opt) => get_para_del(&mut *opt),
-            IdQdel(_) => {}
+            IdQdel => {}
             _ => {}
         };
         id

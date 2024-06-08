@@ -17,7 +17,7 @@ pub enum CommandID {
 
     IdModarch(Option<Save>),
     IdDel(Option<Del>),
-    IdQdel(Option<Del>),
+    IdQdel,
 
     IdUsage,
     IdFavor,
@@ -44,6 +44,12 @@ impl Save {
         Self {
             arch_name: arch_name.to_string(),
             arch_note: arch_note.to_string(),
+        }
+    }
+    pub fn get_empty() -> Self {
+        Self {
+            arch_name: "".to_string(),
+            arch_note: "".to_string(),
         }
     }
 }
