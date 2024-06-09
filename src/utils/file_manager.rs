@@ -78,7 +78,9 @@ impl<'a, T: IOManager> JsonManager<'a, T> {
         self.infos.push(info);
     }
     pub fn infos_del(&mut self, index: usize) {
-        if index < self.infos.len() && index > 0 {
+        if index < self.infos.len()
+        /*&& index >= 0*/
+        {
             self.infos.remove(index);
         } else {
             outln_warn!(self.logger, "存档编号不存在");
@@ -164,8 +166,20 @@ impl<'a, T: IOManager> FileManager<'a, T> {
         Ok(())
     }
     pub fn modify(&mut self, index: usize, new_info: ArchiveInfo) -> Result<(), Error> {
+        let old_path = self
+            .path_to_archive_forlder
+            .join(&self.get_archive_infos()[index].name);
+        let new_path = self.path_to_archive_forlder.join(&new_info.name);
+        fs::rename(&old_path, &new_path)?;
         self.json_manager.infos_modify(index, new_info);
         self.json_manager.write_json()?;
+        Ok(())
+    }
+    pub fn load(&self, index: usize) -> Result<(), Error> {
+        let arch_name = &self.get_archive_infos()[index].name;
+        let src = self.path_to_archive_forlder.join(arch_name);
+        //outln_warn!(self.logger, "{:?}", src);
+        Self::copy_file(&src, &self.path_to_noita_archive)?;
         Ok(())
     }
 

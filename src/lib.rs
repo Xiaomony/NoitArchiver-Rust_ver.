@@ -12,7 +12,7 @@ pub struct Manager<'a, T: IOManager> {
     com_analyzer: com_analyzer::Analyzer,
     file_manager: file_manager::FileManager<'a, T>,
     logger: &'a T,
-    //exit_callback: fn ()
+    is_running: bool
 }
 
 impl<'a, T: IOManager> Manager<'a, T> {
@@ -23,13 +23,17 @@ impl<'a, T: IOManager> Manager<'a, T> {
             com_analyzer,
             file_manager,
             logger,
+            is_running: true,
         }
+    }
+    pub fn is_running(&self) -> bool {
+        self.is_running
     }
 
     pub fn run_command(&mut self, command_input: &str) {
         let id = self.com_analyzer.analyze(command_input);
         // 获取infos长度
-        let getlen = || self.file_manager.get_archive_infolen();
+        let getlen = || self.file_manager.get_archive_infolen() as i32;
 
         match id {
             IdErrCommand(err) => outln_warn!(self.logger, "{}", err),
@@ -66,8 +70,8 @@ impl<'a, T: IOManager> Manager<'a, T> {
         out!(self.logger, "help {}", 10);
     }
 
-    fn quit(&self) {
-        out_log!(self.logger, "退出程序");
+    fn quit(&mut self) {
+        self.is_running = false;
     }
 
     fn save(&mut self, opt: Option<Save>) {
@@ -111,19 +115,27 @@ impl<'a, T: IOManager> Manager<'a, T> {
                 time.second() as usize,
             ],
         );
-        self.file_manager.replace(last, new_info);
+        self.file_manager.replace(last, new_info).unwrap();
     }
 
     fn load(&self, opt: Option<Load>) {
         if let Some(para) = opt {
+            self.file_manager.load(para.index).unwrap();
         } else {
         }
     }
 
-    fn log(&self, range: RangeInclusive<usize>) {
+    fn log(&self, range: RangeInclusive<i32>) {
         let infos = self.file_manager.get_archive_infos();
-        let start = (0 as usize).max(*range.start());
-        let end = ((infos.len() - 1) as usize).min(*range.end());
+        if infos.len() == 0 {
+            outln_warn!(self.logger, "无存档");
+            return;
+        }
+        let start:usize = if *range.start() < 0
+                {0} else {*range.start() as usize};
+        let end:usize = if *range.end() >= infos.len() as i32
+                {infos.len()} else {*range.end() as usize};
+        
 
         for (index, p) in infos[start..=end].iter().enumerate() {
             let time_str = format!(
@@ -150,7 +162,7 @@ impl<'a, T: IOManager> Manager<'a, T> {
                 old_info.date,
                 old_info.time,
             );
-            self.file_manager.modify(para.index, new_info);
+            self.file_manager.modify(para.index, new_info).unwrap();
         } else {
         }
     }

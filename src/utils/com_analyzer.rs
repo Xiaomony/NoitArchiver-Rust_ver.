@@ -68,13 +68,14 @@ impl Analyzer {
         let chars = trimmed_command.chars();
         let mut start = Some(0);
         let mut in_quote = false;
-        let mut index:usize = 0;
+        let mut index: usize = 0;
         for c in chars.into_iter() {
             match c {
                 '"' => {
                     if let Some(start_index) = start {
                         result.push(&trimmed_command[start_index..index]);
                         in_quote = false;
+                        start = None;
                     } else {
                         start = Some(index + 1);
                         in_quote = true;
@@ -132,9 +133,9 @@ impl Analyzer {
             let result = parts[1].parse::<usize>();
             if let Ok(index) = result {
                 match parts.len() {
-                    3 => *opt = Some(Modify::new(index-1, parts[2], "")),
-                    len if len>=4 => *opt = Some(Modify::new(index-1, parts[2], parts[3])),
-                    _ => *opt = None
+                    3 => *opt = Some(Modify::new(index - 1, parts[2], "")),
+                    len if len >= 4 => *opt = Some(Modify::new(index - 1, parts[2], parts[3])),
+                    _ => *opt = None,
                 }
             } else {
                 *opt = None
@@ -142,20 +143,28 @@ impl Analyzer {
         };
 
         let get_para_load = |opt: &mut Option<_>| {
-            let index = parts[1].parse::<usize>();
-            if let Err(_) = index {
-                *opt = None
+            if parts.len() <= 1 {
+                *opt = None;
             } else {
-                *opt = Some(Load::new(index.unwrap()-1));
+                let index = parts[1].parse::<usize>();
+                if let Err(_) = index {
+                    *opt = None
+                } else {
+                    *opt = Some(Load::new(index.unwrap() - 1));
+                }
             }
         };
 
         let get_para_del = |opt: &mut Option<_>| {
-            let index = parts[1].parse::<usize>();
-            if let Err(_) = index {
-                *opt = None
+            if parts.len() <= 1 {
+                *opt = None;
             } else {
-                *opt = Some(Del::new(index.unwrap()-1));
+                let index = parts[1].parse::<usize>();
+                if let Err(_) = index {
+                    *opt = None
+                } else {
+                    *opt = Some(Del::new(index.unwrap() - 1));
+                }
             }
         };
 
