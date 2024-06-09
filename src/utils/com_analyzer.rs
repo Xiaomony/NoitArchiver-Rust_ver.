@@ -34,11 +34,11 @@ impl Analyzer {
         comlist.push(comm!("quit", "q", IdQuit));
 
         comlist.push(comm!("save", "s", IdSave(None)));
-        comlist.push(comm!("qsave", "qs", IdQsave(Some(Save::get_empty()))));
+        comlist.push(comm!("qsave", "qs", IdQsave));
         comlist.push(comm!("rsave", "rs", IdRsave(None)));
 
         comlist.push(comm!("load", "l", IdLoad(None)));
-        comlist.push(comm!("qload", "ql", IdQload(None)));
+        comlist.push(comm!("qload", "ql", IdQload));
         comlist.push(comm!("log", "lg", IdLog));
         comlist.push(comm!("slog", "sl", IdSlog));
 
@@ -112,17 +112,17 @@ impl Analyzer {
         let head = parts.first().unwrap().to_string(); // head为所获得的命令
 
         // 闭包：寻找命令
-        let find = |input: String| -> CommandID {
-            let mut id = IdErrCommand("未找到命令:".to_string());
+        let find = |input: String| -> Result<CommandID, Error> {
+            let id;
             for com in self.command_list.iter() {
                 if input == com.short_name || input == com.full_name {
                     id = com.id.clone();
-                    break;
+                    return Ok(id);
                 }
             }
-            id
+            Err(Error::GeneralError("未找到命令".to_string()))
         };
-        let mut id = find(head);
+        let mut id = find(head)?;
         // 闭包：处理各种命令、装填参数
         let get_para_save = |opt: &mut Option<_>| match parts.len() {
             2 => *opt = Some(Save::new(parts[1], "")),
@@ -169,7 +169,6 @@ impl Analyzer {
                 get_para_save(&mut *opt);
                 Ok(())
             }
-            //IdQsave(_) => {}
             IdLoad(ref mut opt) => get_para_load(&mut *opt),
 
             IdModarch(ref mut opt) => get_para_modify(&mut *opt),

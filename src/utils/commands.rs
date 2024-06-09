@@ -2,18 +2,16 @@
 
 #[derive(Debug, Clone)]
 pub enum CommandID {
-    IdErrCommand(String),
-
     IdClear,
     IdHelp,
     IdQuit,
 
     IdSave(Option<Save>),
-    IdQsave(Option<Save>),
+    IdQsave,
     IdRsave(Option<Save>),
 
     IdLoad(Option<Load>),
-    IdQload(Option<Load>),
+    IdQload,
     IdLog,
     IdSlog,
 
@@ -52,12 +50,6 @@ impl Save {
         Self {
             arch_name: arch_name.to_string(),
             arch_note: arch_note.to_string(),
-        }
-    }
-    pub fn get_empty() -> Self {
-        Self {
-            arch_name: "".to_string(),
-            arch_note: "".to_string(),
         }
     }
 }

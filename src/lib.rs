@@ -31,51 +31,57 @@ impl<'a, T: IOManager> Manager<'a, T> {
     }
 
     pub fn run_command(&mut self, command_input: &str) -> Result<(), Error> {
-        let id = self.com_analyzer.analyze(command_input)?;
+        let result = self.com_analyzer.analyze(command_input);
+        let id;
+        if let Err(e) = result {
+            outln_warn!(self.logger, "{}", e);
+            return Ok(());
+        } else {
+            id = result.unwrap();
+        }
         // 获取infos长度
         let getlen = || self.file_manager.get_archive_infolen() as i32;
 
         match id {
-            IdErrCommand(err) => outln_warn!(self.logger, "{}", err),
             IdClear => self.clear(),
             IdHelp => self.help(),
             IdQuit => self.quit(),
 
-            IdSave(opt) | IdQsave(opt) => self.save(opt),
+            IdSave(opt) => self.save(opt),
+            IdQsave => self.qsave(), //
             IdRsave(_) => self.rsave(),
 
             IdLoad(opt) => self.load(opt),
-            IdQload(ref opt) => {
-                println!("qload {:?}", opt);
-            }
+            IdQload => self.qload(), //
             IdLog => self.log(0..=getlen() - 1),
             IdSlog => self.log(getlen() - 7..=getlen() - 1),
 
             IdModarch(opt) => self.modify_archive(opt),
             IdDel(opt) => self.del(opt),
-            IdQdel => {
-                //
-            }
+            IdQdel => self.qdel(), //
             IdUsage => self.usage(),
             IdFavor => self.favor(),
-        };
+        }?;
         Ok(())
     }
 
-    fn clear(&self) {
+    fn clear(&self) -> Result<(), Error> {
         self.logger.io_cls();
         // let commands = self.file_manager
+        Ok(())
     }
 
-    fn help(&self) {
+    fn help(&self) -> Result<(), Error> {
         out!(self.logger, "help {}", 10);
+        Ok(())
     }
 
-    fn quit(&mut self) {
+    fn quit(&mut self) -> Result<(), Error> {
         self.is_running = false;
+        Ok(())
     }
 
-    fn save(&mut self, opt: Option<Save>) {
+    fn save(&mut self, opt: Option<Save>) -> Result<(), Error> {
         if let Some(para) = opt {
             let time = Local::now();
             let info = file_manager::ArchiveInfo::new(
@@ -92,13 +98,35 @@ impl<'a, T: IOManager> Manager<'a, T> {
                     time.second() as usize,
                 ],
             );
-            self.file_manager.save(info).unwrap();
+            self.file_manager.save(info).with_moreinfo("存档失败")?;
         } else {
         }
         outln_suc!(self.logger, "保存成功");
+        Ok(())
     }
 
-    fn rsave(&mut self) {
+    fn qsave(&mut self) -> Result<(), Error> {
+        let time = Local::now();
+        let info = file_manager::ArchiveInfo::new(
+            &format!("{}_quick_save", self.file_manager.get_archive_infolen()),
+            "",
+            [
+                time.year() as usize,
+                time.month() as usize,
+                time.day() as usize,
+            ],
+            [
+                time.hour() as usize,
+                time.minute() as usize,
+                time.second() as usize,
+            ],
+        );
+        self.file_manager.save(info).with_moreinfo("存档失败")?;
+        outln_suc!(self.logger, "保存成功");
+        Ok(())
+    }
+
+    fn rsave(&mut self) -> Result<(), Error> {
         let infos = self.file_manager.get_archive_infos();
         let last = infos.len() - 1;
         let time = Local::now();
@@ -116,21 +144,41 @@ impl<'a, T: IOManager> Manager<'a, T> {
                 time.second() as usize,
             ],
         );
-        self.file_manager.replace(last, new_info).unwrap();
+        self.file_manager
+            .replace(last, new_info)
+            .with_moreinfo("覆盖存储失败")?;
+        outln_suc!(self.logger, "覆盖存储成功");
+        Ok(())
     }
 
-    fn load(&self, opt: Option<Load>) {
+    fn load(&self, opt: Option<Load>) -> Result<(), Error> {
         if let Some(para) = opt {
-            self.file_manager.load(para.index).unwrap();
+            self.file_manager
+                .load(para.index)
+                .with_moreinfo("读档失败")?;
         } else {
         }
+        outln_suc!(self.logger, "读档成功");
+        Ok(())
     }
 
-    fn log(&self, range: RangeInclusive<i32>) {
+    fn qload(&self) -> Result<(), Error> {
+        let last = self.file_manager.get_archive_infolen();
+        if last == 0 {
+            outln_warn!(self.logger, "存档编号不存在");
+            return Ok(());
+        }
+        self.file_manager
+            .load(last - 1)
+            .with_moreinfo("快速读档失败")?;
+        Ok(())
+    }
+
+    fn log(&self, range: RangeInclusive<i32>) -> Result<(), Error> {
         let infos = self.file_manager.get_archive_infos();
         if infos.len() == 0 {
             outln_warn!(self.logger, "无存档");
-            return;
+            return Ok(());
         }
         let start: usize = if *range.start() < 0 {
             0
@@ -157,9 +205,10 @@ impl<'a, T: IOManager> Manager<'a, T> {
                 &p.note
             );
         }
+        Ok(())
     }
 
-    fn modify_archive(&mut self, opt: Option<Modify>) {
+    fn modify_archive(&mut self, opt: Option<Modify>) -> Result<(), Error> {
         if let Some(para) = opt {
             let old_info = &self.file_manager.get_archive_infos()[para.index];
             let new_info = file_manager::ArchiveInfo::new(
@@ -168,19 +217,44 @@ impl<'a, T: IOManager> Manager<'a, T> {
                 old_info.date,
                 old_info.time,
             );
-            self.file_manager.modify(para.index, new_info).unwrap();
+            self.file_manager
+                .modify(para.index, new_info)
+                .with_moreinfo("修改存档信息失败")?;
         } else {
         }
+        outln_suc!(self.logger, "修改成功");
+        Ok(())
     }
 
-    fn del(&mut self, opt: Option<Del>) {
+    fn del(&mut self, opt: Option<Del>) -> Result<(), Error> {
         if let Some(para) = opt {
-            self.file_manager.del(para.index).unwrap();
+            self.file_manager
+                .del(para.index)
+                .with_moreinfo("删除存档失败")?;
         } else {
         }
+        outln_suc!(self.logger, "删除成功");
+        Ok(())
     }
 
-    fn usage(&self) {}
+    fn qdel(&mut self) -> Result<(), Error> {
+        let last = self.file_manager.get_archive_infolen();
+        if last == 0 {
+            outln_warn!(self.logger, "存档编号不存在");
+            return Ok(());
+        }
+        self.file_manager
+            .del(last - 1)
+            .with_moreinfo("删除存档失败")?;
+        outln_suc!(self.logger, "删除成功");
+        Ok(())
+    }
 
-    fn favor(&self) {}
+    fn usage(&self) -> Result<(), Error> {
+        Ok(())
+    }
+
+    fn favor(&self) -> Result<(), Error> {
+        Ok(())
+    }
 }

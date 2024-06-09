@@ -132,7 +132,6 @@ impl From<core::num::ParseIntError> for Error {
 pub trait ResultExt<T> {
     fn with_msg(self, msg: &str) -> Result<T, Error>;
     fn with_moreinfo(self, msg: &str) -> Result<T, Error>;
-    //fn unwrap_puase(self) -> T;
 }
 
 impl<T, E> ResultExt<T> for Result<T, E>

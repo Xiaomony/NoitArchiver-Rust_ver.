@@ -1,5 +1,5 @@
 use super::io_manager::{Error, IOManager, ResultExt};
-use crate::{outln, outln_err, outln_warn};
+use crate::outln_warn;
 
 use serde::{Deserialize, Serialize};
 use serde_json;
@@ -32,7 +32,7 @@ impl ArchiveInfo {
 struct JsonManager<'a, T: IOManager> {
     infos: Vec<ArchiveInfo>,
     path_to_json: PathBuf,
-    logger: &'a T,
+    _logger: &'a T,
 }
 
 pub struct FileManager<'a, T: IOManager> {
@@ -45,11 +45,11 @@ pub struct FileManager<'a, T: IOManager> {
 }
 
 impl<'a, T: IOManager> JsonManager<'a, T> {
-    fn new(path_to_json: PathBuf, logger: &'a T) -> Self {
+    fn new(path_to_json: PathBuf, _logger: &'a T) -> Self {
         Self {
             infos: Vec::new(),
             path_to_json,
-            logger,
+            _logger,
         }
     }
 
@@ -58,7 +58,8 @@ impl<'a, T: IOManager> JsonManager<'a, T> {
     }
 
     pub fn load_json(&mut self) -> Result<(), Error> {
-        let f = File::open(&self.path_to_json).with_moreinfo("打开备份信息文件(./Archives/infos.json)失败")?;
+        let f = File::open(&self.path_to_json)
+            .with_moreinfo("打开备份信息文件(./Archives/infos.json)失败")?;
         let reader = BufReader::new(f);
         self.infos = serde_json::from_reader(reader).with_msg(
             "读取存档信息文件失败\n可能为Json文件格式错误,尝试手动修复./Archives/infos.json或删除Archive文件夹(删除Archive文件夹会导致存档的丢失！！！)"
@@ -75,27 +76,10 @@ impl<'a, T: IOManager> JsonManager<'a, T> {
         self.infos.push(info);
     }
     pub fn infos_del(&mut self, index: usize) {
-        if index < self.infos.len()
-        /*&& index >= 0*/
-        {
-            self.infos.remove(index);
-        } else {
-            outln_warn!(self.logger, "存档编号不存在");
-        }
-    }
-    pub fn _infos_pop(&mut self) {
-        if self.infos.len() > 0 {
-            self.infos.pop();
-        } else {
-            outln_warn!(self.logger, "无存档可删除");
-        }
+        self.infos.remove(index);
     }
     pub fn infos_modify(&mut self, index: usize, new_info: ArchiveInfo) {
-        if index < self.infos.len() && index > 0 {
-            self.infos[index] = new_info
-        } else {
-            outln_warn!(self.logger, "存档编号不存在");
-        }
+        self.infos[index] = new_info;
     }
 }
 
@@ -118,7 +102,8 @@ impl<'a, T: IOManager> FileManager<'a, T> {
     fn init(&self) -> Result<(), Error> {
         fs::create_dir_all(&self.path_to_archive_forlder).with_moreinfo("创建备份文件夹失败")?;
         if !self.path_to_infos_json.exists() {
-            let mut f = File::create(&(self.path_to_infos_json)).with_moreinfo("创建备份json文件失败")?;
+            let mut f =
+                File::create(&(self.path_to_infos_json)).with_moreinfo("创建备份json文件失败")?;
             f.write_all(b"[\n]").with_msg("初始化备份json文件失败")?;
         }
         Ok(())
@@ -135,32 +120,48 @@ impl<'a, T: IOManager> FileManager<'a, T> {
     }
     pub fn save(&mut self, info: ArchiveInfo) -> Result<(), Error> {
         let dst_path = self.path_to_archive_forlder.join(&info.name);
-        Self::copy_file(&self.path_to_noita_archive, &dst_path).with_moreinfo("复制存档失败(请确保Noita完全关闭且程序拥有相关权限)")?;
+        Self::copy_file(&self.path_to_noita_archive, &dst_path)
+            .with_moreinfo("复制存档失败(请确保Noita完全关闭且程序拥有相关权限)")?;
         self.json_manager.infos_push(info);
         self.json_manager.write_json()?;
         Ok(())
     }
     pub fn del(&mut self, index: usize) -> Result<(), Error> {
+        if index >= self.get_archive_infolen() {
+            outln_warn!(self.logger, "存档编号不存在");
+            return Ok(());
+        }
         let arch_info = &(self.json_manager.get_archive_infos()[index]);
-        fs::remove_dir_all(self.path_to_archive_forlder.join(&arch_info.name)).
-            with_moreinfo("删除存档文件夹失败,请尝试手动删除")?;
+        fs::remove_dir_all(self.path_to_archive_forlder.join(&arch_info.name))
+            .with_moreinfo("删除存档文件夹失败,请尝试手动删除")?;
         self.json_manager.infos_del(index);
         self.json_manager.write_json()?;
         Ok(())
     }
     pub fn replace(&mut self, index: usize, new_info: ArchiveInfo) -> Result<(), Error> {
+        if index >= self.get_archive_infolen() {
+            outln_warn!(self.logger, "存档编号不存在");
+            return Ok(());
+        }
+
         let old_info = &self.json_manager.get_archive_infos()[index];
-        fs::remove_dir_all(self.path_to_archive_forlder.join(&(old_info.name))).
-            with_moreinfo("删除旧的存档文件夹失败,请尝试手动替换存档")?;
+        fs::remove_dir_all(self.path_to_archive_forlder.join(&(old_info.name)))
+            .with_moreinfo("删除旧的存档文件夹失败,请尝试手动替换存档")?;
         Self::copy_file(
             &self.path_to_noita_archive,
             &self.path_to_archive_forlder.join(&new_info.name),
-        ).with_moreinfo("复制新存档失败,尝试手动替换存档")?;
+        )
+        .with_moreinfo("复制新存档失败,尝试手动替换存档")?;
         self.json_manager.infos_modify(index, new_info);
         self.json_manager.write_json()?;
         Ok(())
     }
     pub fn modify(&mut self, index: usize, new_info: ArchiveInfo) -> Result<(), Error> {
+        if index >= self.get_archive_infolen() {
+            outln_warn!(self.logger, "存档编号不存在");
+            return Ok(());
+        }
+
         let old_path = self
             .path_to_archive_forlder
             .join(&self.get_archive_infos()[index].name);
@@ -171,6 +172,11 @@ impl<'a, T: IOManager> FileManager<'a, T> {
         Ok(())
     }
     pub fn load(&self, index: usize) -> Result<(), Error> {
+        if index >= self.get_archive_infolen() {
+            outln_warn!(self.logger, "存档编号不存在");
+            return Ok(());
+        }
+
         let arch_name = &self.get_archive_infos()[index].name;
         let src = self.path_to_archive_forlder.join(arch_name);
         Self::copy_file(&src, &self.path_to_noita_archive).with_moreinfo("复制存档文件夹失败")?;
