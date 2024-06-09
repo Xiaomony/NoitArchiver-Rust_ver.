@@ -1,8 +1,8 @@
-use super::io_manager::Error;
+//use super::io_manager::Error;
 
 #[derive(Debug, Clone)]
 pub enum CommandID {
-    IdErrCommand(Error),
+    IdErrCommand(String),
 
     IdClear,
     IdHelp,

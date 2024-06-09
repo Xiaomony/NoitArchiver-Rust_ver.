@@ -12,26 +12,26 @@ pub struct Manager<'a, T: IOManager> {
     com_analyzer: com_analyzer::Analyzer,
     file_manager: file_manager::FileManager<'a, T>,
     logger: &'a T,
-    is_running: bool
+    is_running: bool,
 }
 
 impl<'a, T: IOManager> Manager<'a, T> {
-    pub fn new(logger: &'a T) -> Self {
+    pub fn new(logger: &'a T) -> Result<Self, Error> {
         let com_analyzer = com_analyzer::Analyzer::new();
-        let file_manager = file_manager::FileManager::new(logger);
-        Self {
+        let file_manager = file_manager::FileManager::new(logger)?;
+        Ok(Self {
             com_analyzer,
             file_manager,
             logger,
             is_running: true,
-        }
+        })
     }
     pub fn is_running(&self) -> bool {
         self.is_running
     }
 
-    pub fn run_command(&mut self, command_input: &str) {
-        let id = self.com_analyzer.analyze(command_input);
+    pub fn run_command(&mut self, command_input: &str) -> Result<(), Error> {
+        let id = self.com_analyzer.analyze(command_input)?;
         // 获取infos长度
         let getlen = || self.file_manager.get_archive_infolen() as i32;
 
@@ -58,7 +58,8 @@ impl<'a, T: IOManager> Manager<'a, T> {
             }
             IdUsage => self.usage(),
             IdFavor => self.favor(),
-        }
+        };
+        Ok(())
     }
 
     fn clear(&self) {
@@ -131,11 +132,16 @@ impl<'a, T: IOManager> Manager<'a, T> {
             outln_warn!(self.logger, "无存档");
             return;
         }
-        let start:usize = if *range.start() < 0
-                {0} else {*range.start() as usize};
-        let end:usize = if *range.end() >= infos.len() as i32
-                {infos.len()} else {*range.end() as usize};
-        
+        let start: usize = if *range.start() < 0 {
+            0
+        } else {
+            *range.start() as usize
+        };
+        let end: usize = if *range.end() >= infos.len() as i32 {
+            infos.len()
+        } else {
+            *range.end() as usize
+        };
 
         for (index, p) in infos[start..=end].iter().enumerate() {
             let time_str = format!(

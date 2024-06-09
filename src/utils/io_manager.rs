@@ -81,32 +81,19 @@ pub trait IOManager {
 
 #[derive(Debug)]
 pub enum Error {
-    None, // 不便构造Clone方法的变体,在Clone时返回None
-    CommandError(String),
+    GeneralError(String),
     JsonTranslateError(serde_json::Error),
     IoError(std::io::Error),
-}
-
-impl Clone for Error {
-    fn clone(&self) -> Self {
-        match *self {
-            Self::CommandError(ref msg) => Self::CommandError(msg.clone()),
-            Self::IoError(ref err) => {
-                Self::IoError(std::io::Error::new(err.kind(), err.to_string().as_str()))
-            }
-            Self::JsonTranslateError(_) => Self::None,
-            Self::None => Self::None,
-        }
-    }
+    ParseIntError(core::num::ParseIntError),
 }
 
 impl std::fmt::Display for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match *self {
-            Self::None => write!(f, "None"),        // ***********
-            Self::CommandError(ref msg) => write!(f, "[Command Error]\t{}", msg),
+            Self::GeneralError(ref msg) => write!(f, "{}", msg),
             Self::IoError(ref err) => write!(f, "[IoError]\t{}", err),
             Self::JsonTranslateError(ref err) => write!(f, "[JsonTranslateError]\t{}", err),
+            Self::ParseIntError(ref err) => write!(f, "[ParseIntError]\t{}", err),
         }
     }
 }
@@ -114,10 +101,10 @@ impl std::fmt::Display for Error {
 impl std::error::Error for Error {
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
         match *self {
-            Self::None => None, // **********
-            Self::CommandError(_) => None,
+            Self::GeneralError(_) => None,
             Self::IoError(ref err) => Some(err),
             Self::JsonTranslateError(ref err) => Some(err),
+            Self::ParseIntError(ref err) => Some(err),
         }
     }
 }
@@ -131,5 +118,34 @@ impl From<std::io::Error> for Error {
 impl From<serde_json::Error> for Error {
     fn from(value: serde_json::Error) -> Self {
         Error::JsonTranslateError(value)
+    }
+}
+
+impl From<core::num::ParseIntError> for Error {
+    fn from(value: core::num::ParseIntError) -> Self {
+        Error::ParseIntError(value)
+    }
+}
+
+// 对Result类型加工，方便错误的处理和传播
+
+pub trait ResultExt<T> {
+    fn with_msg(self, msg: &str) -> Result<T, Error>;
+    fn with_moreinfo(self, msg: &str) -> Result<T, Error>;
+    //fn unwrap_puase(self) -> T;
+}
+
+impl<T, E> ResultExt<T> for Result<T, E>
+where
+    E: Into<Error>,
+{
+    fn with_msg(self, msg: &str) -> Result<T, Error> {
+        match self {
+            Err(_) => Err(Error::GeneralError(format!("{}", msg))),
+            Ok(ok) => Ok(ok),
+        }
+    }
+    fn with_moreinfo(self, msg: &str) -> Result<T, Error> {
+        self.map_err(|e| Error::GeneralError(format!("{}\n\t{}", msg, e.into())))
     }
 }

@@ -50,6 +50,7 @@ impl IOManager for IOCommandLine {
     }
 
     fn io_cls(&self) {
+        // ---------------------------需要跨平台实现-------------------------
         Command::new("clear")
             .status()
             .expect("Failed to clear screen");

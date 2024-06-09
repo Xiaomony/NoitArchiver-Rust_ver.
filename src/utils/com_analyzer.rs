@@ -1,7 +1,7 @@
 // use regex::Regex;
 
 use super::commands::{CommandID::*, *};
-use super::io_manager::Error;
+use super::io_manager::{Error, ResultExt};
 
 pub struct ComMap {
     full_name: String,
@@ -103,16 +103,17 @@ impl Analyzer {
         result
     }
 
-    pub fn analyze(&self, command_input: &str) -> CommandID {
+    pub fn analyze(&self, command_input: &str) -> Result<CommandID, Error> {
         let parts: Vec<&str> = Self::preprocess_command(command_input);
+
         if parts.first() == None {
-            return CommandID::IdErrCommand(Error::CommandError("无命令输入".to_string()));
+            return Err(Error::GeneralError("无命令输入".to_string()));
         }
         let head = parts.first().unwrap().to_string(); // head为所获得的命令
 
         // 闭包：寻找命令
         let find = |input: String| -> CommandID {
-            let mut id = IdErrCommand(Error::CommandError("未找到命令:".to_string()));
+            let mut id = IdErrCommand("未找到命令:".to_string());
             for com in self.command_list.iter() {
                 if input == com.short_name || input == com.full_name {
                     id = com.id.clone();
@@ -129,58 +130,52 @@ impl Analyzer {
             _ => *opt = None,
         };
 
-        let get_para_modify = |opt: &mut Option<_>| {
-            let result = parts[1].parse::<usize>();
-            if let Ok(index) = result {
-                match parts.len() {
-                    3 => *opt = Some(Modify::new(index - 1, parts[2], "")),
-                    len if len >= 4 => *opt = Some(Modify::new(index - 1, parts[2], parts[3])),
-                    _ => *opt = None,
-                }
-            } else {
-                *opt = None
-            }
-        };
-
-        let get_para_load = |opt: &mut Option<_>| {
+        let get_para_modify = |opt: &mut Option<_>| -> Result<(), Error> {
             if parts.len() <= 1 {
                 *opt = None;
-            } else {
-                let index = parts[1].parse::<usize>();
-                if let Err(_) = index {
-                    *opt = None
-                } else {
-                    *opt = Some(Load::new(index.unwrap() - 1));
-                }
+                return Ok(());
             }
+            let index = parts[1].parse::<usize>().with_msg("命令格式错误")?;
+            match parts.len() {
+                3 => *opt = Some(Modify::new(index - 1, parts[2], "")),
+                len if len >= 4 => *opt = Some(Modify::new(index - 1, parts[2], parts[3])),
+                _ => *opt = None,
+            }
+            Ok(())
         };
 
-        let get_para_del = |opt: &mut Option<_>| {
+        let get_para_load = |opt: &mut Option<_>| -> Result<(), Error> {
             if parts.len() <= 1 {
                 *opt = None;
-            } else {
-                let index = parts[1].parse::<usize>();
-                if let Err(_) = index {
-                    *opt = None
-                } else {
-                    *opt = Some(Del::new(index.unwrap() - 1));
-                }
+                return Ok(());
             }
+            let index = parts[1].parse::<usize>().with_msg("命令格式错误")?;
+            *opt = Some(Load::new(index - 1));
+            Ok(())
+        };
+
+        let get_para_del = |opt: &mut Option<_>| -> Result<(), Error> {
+            if parts.len() <= 1 {
+                *opt = None;
+                return Ok(());
+            }
+            let index = parts[1].parse::<usize>().with_msg("命令格式错误")?;
+            *opt = Some(Del::new(index - 1));
+            Ok(())
         };
 
         match id {
-            IdSave(ref mut opt) => get_para_save(&mut *opt),
-            IdQsave(_) => {}
-            IdRsave(_) => {}
-
+            IdSave(ref mut opt) => {
+                get_para_save(&mut *opt);
+                Ok(())
+            }
+            //IdQsave(_) => {}
             IdLoad(ref mut opt) => get_para_load(&mut *opt),
-            IdQload(_) => {}
 
             IdModarch(ref mut opt) => get_para_modify(&mut *opt),
             IdDel(ref mut opt) => get_para_del(&mut *opt),
-            IdQdel => {}
-            _ => {}
-        };
-        id
+            _ => Ok(()),
+        }?;
+        Ok(id)
     }
 }
