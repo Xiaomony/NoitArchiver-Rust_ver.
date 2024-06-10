@@ -75,6 +75,8 @@ pub trait IOManager {
     fn io_print_suc(&self, args: Arguments);
 
     fn io_getline(&self) -> String;
+    fn io_getint(&self) -> Option<i32>;
+    fn io_comfirm(&self) -> bool;
 
     fn io_cls(&self);
 }

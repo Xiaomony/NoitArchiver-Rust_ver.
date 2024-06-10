@@ -45,13 +45,38 @@ impl IOManager for IOCommandLine {
         let mut input = String::new();
         io::stdin()
             .read_line(&mut input)
-            .expect("fail to read a line");
+            .expect("无法读取输入");
         input
+    }
+    
+    fn io_getint(&self) -> Option<i32> {
+        let mut input = String::new();
+        io::stdin().read_line(&mut input)
+            .expect("无法读取输入");
+        if let Ok(num) = input.trim().parse::<i32>() {
+            Some(num)
+        } else {
+            None
+        }
+    }
+    
+    fn io_comfirm(&self) -> bool {
+        //self.io_print_warn(format_args!("{}(y/n)", msg));
+        let mut input = String::new();
+        io::stdin().read_line(&mut input)
+            .expect("无法读取输入");
+        let trimmed = input.trim();
+        if trimmed == "y" || trimmed == "yes" {
+            true
+        } else {
+            false
+        }
     }
 
     fn io_cls(&self) {
         // ---------------------------需要跨平台实现-------------------------
-        Command::new("clear")
+        Command::new("cmd")
+            .args(&["/C", "cls"])
             .status()
             .expect("Failed to clear screen");
     }

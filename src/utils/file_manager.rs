@@ -3,6 +3,7 @@ use crate::outln_warn;
 
 use serde::{Deserialize, Serialize};
 use serde_json;
+//use std::fmt::format;
 //use serde_json::ser::PrettyFormatter;
 use std::fs;
 use std::fs::File;
@@ -26,6 +27,12 @@ impl ArchiveInfo {
             date,
             time,
         }
+    }
+    pub fn to_string(&self) -> String {
+        format!("[{}-{}-{} {}:{}:{}]  {}",
+            self.date[0], self.date[1], self.date[2],
+            self.time[0], self.time[1], self.time[2],
+            self.name)
     }
 }
 
@@ -109,7 +116,7 @@ impl<'a, T: IOManager> FileManager<'a, T> {
         Ok(())
     }
     fn get_noita_arch_path() -> Result<String, Error> {
-        Ok("/home/runner/NoitaArchiveManagerRust-ver/NoitaArch".to_string())
+        Ok("./NoitaArch".to_string())
     }
 
     pub fn get_archive_infos(&self) -> &Vec<ArchiveInfo> {
@@ -184,6 +191,9 @@ impl<'a, T: IOManager> FileManager<'a, T> {
     }
 
     fn copy_file(src: &Path, dst: &Path) -> Result<(), Error> {
+        if !src.exists() {
+            return Err(Error::GeneralError(format!("未找到目录:{}",src.to_str().unwrap())));
+        }
         fs::create_dir_all(dst)?;
         for entry in fs::read_dir(src)? {
             let entry = entry?;

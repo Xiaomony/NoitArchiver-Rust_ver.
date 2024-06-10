@@ -82,25 +82,40 @@ impl<'a, T: IOManager> Manager<'a, T> {
     }
 
     fn save(&mut self, opt: Option<Save>) -> Result<(), Error> {
-        if let Some(para) = opt {
-            let time = Local::now();
-            let info = file_manager::ArchiveInfo::new(
-                &para.arch_name,
-                &para.arch_note,
-                [
-                    time.year() as usize,
-                    time.month() as usize,
-                    time.day() as usize,
-                ],
-                [
-                    time.hour() as usize,
-                    time.minute() as usize,
-                    time.second() as usize,
-                ],
-            );
-            self.file_manager.save(info).with_moreinfo("存档失败")?;
-        } else {
-        }
+        let para;
+        match opt {
+            Some(_) => para = opt.unwrap(),
+            None => {
+                out!(self.logger, "请输入存档名(直接换行则取消保存):");
+                let arch_name = self.logger.io_getline().trim().to_string();
+                if arch_name.is_empty() {
+                    outln_log!(self.logger, "取消存档");
+                    return Ok(());
+                }
+                out!(self.logger, "请输入存档备注(直接换行则不填):");
+                let arch_note = self.logger.io_getline().trim().to_string();
+                
+                para = Save::new(&arch_name, &arch_note);
+            }
+        };
+        
+        let time = Local::now();
+        let info = file_manager::ArchiveInfo::new(
+            &para.arch_name,
+            &para.arch_note,
+            [
+                time.year() as usize,
+                time.month() as usize,
+                time.day() as usize,
+            ],
+            [
+                time.hour() as usize,
+                time.minute() as usize,
+                time.second() as usize,
+            ],
+        );
+        self.file_manager.save(info).with_moreinfo("存档失败")?;
+        
         outln_suc!(self.logger, "保存成功");
         Ok(())
     }
@@ -129,6 +144,10 @@ impl<'a, T: IOManager> Manager<'a, T> {
     fn rsave(&mut self) -> Result<(), Error> {
         let infos = self.file_manager.get_archive_infos();
         let last = infos.len() - 1;
+        out_warn!(self.logger, "此操作会覆盖存档 \"{}\" 请确认(y/n):", infos[last].to_string());
+        if !self.logger.io_comfirm() {
+            outln_log!(self.logger, "取消存档");
+        }
         let time = Local::now();
         let new_info = file_manager::ArchiveInfo::new(
             &infos[last].name,
@@ -152,22 +171,53 @@ impl<'a, T: IOManager> Manager<'a, T> {
     }
 
     fn load(&self, opt: Option<Load>) -> Result<(), Error> {
-        if let Some(para) = opt {
-            self.file_manager
-                .load(para.index)
-                .with_moreinfo("读档失败")?;
-        } else {
+        let para;
+        match opt {
+            Some(_) => para = opt.unwrap(),
+            None => {
+                out!(self.logger, "请输入存档编号(直接换行则取消读档):");
+                if let Some(index) = self.logger.io_getint(){
+                    para = Load::new((index - 1) as usize);
+                } else {
+                    outln_log!(self.logger, "取消读档");
+                    return Ok(());
+                }
+            }
+        };
+        
+        if para.index >= self.file_manager.get_archive_infolen() {
+            outln_warn!(self.logger, "存档编号{}不存在", para.index);
+            return Ok(());
         }
+        
+        out_warn!(self.logger, "此操作会用存档 \"{}\" 覆盖现有存档,请确认(y/n):",
+            self.file_manager.get_archive_infos()[para.index].to_string());
+        if !self.logger.io_comfirm() {
+            outln_log!(self.logger, "取消存档");
+        }
+
+        self.file_manager
+            .load(para.index)
+            .with_moreinfo("读档失败")?;
+
         outln_suc!(self.logger, "读档成功");
         Ok(())
     }
 
     fn qload(&self) -> Result<(), Error> {
-        let last = self.file_manager.get_archive_infolen();
+        let mut last = self.file_manager.get_archive_infolen();
         if last == 0 {
-            outln_warn!(self.logger, "存档编号不存在");
+            outln_warn!(self.logger, "无存档可读取");
             return Ok(());
         }
+        last -= 1;
+
+        out_warn!(self.logger, "此操作会用存档 \"{}\" 覆盖现有存档,请确认(y/n):",
+            self.file_manager.get_archive_infos()[last].to_string());
+        if !self.logger.io_comfirm() {
+            outln_log!(self.logger, "取消存档");
+        }
+
         self.file_manager
             .load(last - 1)
             .with_moreinfo("快速读档失败")?;
@@ -209,40 +259,95 @@ impl<'a, T: IOManager> Manager<'a, T> {
     }
 
     fn modify_archive(&mut self, opt: Option<Modify>) -> Result<(), Error> {
-        if let Some(para) = opt {
-            let old_info = &self.file_manager.get_archive_infos()[para.index];
-            let new_info = file_manager::ArchiveInfo::new(
-                &para.info.arch_name,
-                &para.info.arch_note,
-                old_info.date,
-                old_info.time,
-            );
-            self.file_manager
-                .modify(para.index, new_info)
-                .with_moreinfo("修改存档信息失败")?;
-        } else {
+        let para;
+        match opt {
+            Some(_) => para = opt.unwrap(),
+            None => {
+                out!(self.logger, "请输入存档编号(直接换行则取消修改):");
+                if let Some(index) = self.logger.io_getint(){
+                    out!(self.logger, "请输入存档名(直接换行则取消修改):");
+                    let arch_name = self.logger.io_getline().trim().to_string();
+                    if arch_name.is_empty() {
+                        outln_log!(self.logger, "取消修改");
+                        return Ok(());
+                    }
+                    out!(self.logger, "请输入存档备注(直接换行则不填):");
+                    let arch_note = self.logger.io_getline().trim().to_string();
+                    para = Modify::new((index - 1) as usize, &arch_name,&arch_note);
+                } else {
+                    outln_log!(self.logger, "取消修改");
+                    return Ok(());
+                }
+            }
+        };
+
+        if para.index >= self.file_manager.get_archive_infolen() {
+            outln_warn!(self.logger, "存档编号{}不存在", para.index);
+            return Ok(());
         }
+        
+        let old_info = &self.file_manager.get_archive_infos()[para.index];
+        let new_info = file_manager::ArchiveInfo::new(
+            &para.info.arch_name,
+            &para.info.arch_note,
+            old_info.date,
+            old_info.time,
+        );
+        self.file_manager
+            .modify(para.index, new_info)
+            .with_moreinfo("修改存档信息失败")?;
+
         outln_suc!(self.logger, "修改成功");
         Ok(())
     }
 
     fn del(&mut self, opt: Option<Del>) -> Result<(), Error> {
-        if let Some(para) = opt {
-            self.file_manager
-                .del(para.index)
-                .with_moreinfo("删除存档失败")?;
-        } else {
+        let para;
+        match opt {
+            Some(_) => para = opt.unwrap(),
+            None => {
+                out!(self.logger, "请输入存档编号(直接换行则取消删除):");
+                if let Some(index) = self.logger.io_getint(){
+                    para = Del::new((index - 1) as usize);
+                } else {
+                    outln_log!(self.logger, "取消删除");
+                    return Ok(());
+                }
+            }
+        };
+        
+        if para.index >= self.file_manager.get_archive_infolen() {
+            outln_warn!(self.logger, "存档编号{}不存在", para.index);
+            return Ok(());
         }
+        out_warn!(self.logger, "此操作会删除存档 \"{}\" 请确认(y/n):",
+            self.file_manager.get_archive_infos()[para.index].to_string());
+        if !self.logger.io_comfirm() {
+            outln_log!(self.logger, "取消存档");
+        }
+
+        self.file_manager
+            .del(para.index)
+            .with_moreinfo("删除存档失败")?;
+
         outln_suc!(self.logger, "删除成功");
         Ok(())
     }
 
     fn qdel(&mut self) -> Result<(), Error> {
-        let last = self.file_manager.get_archive_infolen();
+        let mut last = self.file_manager.get_archive_infolen();
         if last == 0 {
-            outln_warn!(self.logger, "存档编号不存在");
+            outln_warn!(self.logger, "无存档");
             return Ok(());
         }
+        
+        last -= 1;
+        out_warn!(self.logger, "此操作会用删除存档 \"{}\" 请确认(y/n):",
+            self.file_manager.get_archive_infos()[last].to_string());
+        if !self.logger.io_comfirm() {
+            outln_log!(self.logger, "取消存档");
+        }
+
         self.file_manager
             .del(last - 1)
             .with_moreinfo("删除存档失败")?;
