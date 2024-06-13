@@ -98,6 +98,12 @@ impl<'a, T: IOManager> Manager<'a, T> {
                 para = Save::new(&arch_name, &arch_note);
             }
         };
+
+        let infos = self.file_manager.get_archive_infos();
+        if (*infos).iter().any(|x| x.name == para.arch_name) {
+            outln_warn!(self.logger, "已存在存档名为\"{}\",请重新命名", para.arch_name);
+            return Ok(());
+        }
         
         let time = Local::now();
         let info = file_manager::ArchiveInfo::new(
@@ -122,23 +128,48 @@ impl<'a, T: IOManager> Manager<'a, T> {
 
     fn qsave(&mut self) -> Result<(), Error> {
         let time = Local::now();
+        let date = [
+            time.year() as usize,
+            time.month() as usize,
+            time.day() as usize,
+        ];
+        let time = [
+            time.hour() as usize,
+            time.minute() as usize,
+            time.second() as usize,
+        ];
         let info = file_manager::ArchiveInfo::new(
-            &format!("{}_quick_save", self.file_manager.get_archive_infolen()),
+            &format!("qsave_{}", Self::generate_hashcode(&date, &time)),
             "",
-            [
-                time.year() as usize,
-                time.month() as usize,
-                time.day() as usize,
-            ],
-            [
-                time.hour() as usize,
-                time.minute() as usize,
-                time.second() as usize,
-            ],
+            date,
+            time,
         );
         self.file_manager.save(info).with_moreinfo("存档失败")?;
         outln_suc!(self.logger, "保存成功");
         Ok(())
+    }
+
+    fn generate_hashcode(date: &[usize;3], time: &[usize;3]) -> String {
+        let mut transed: usize = 0;
+        transed += date[1]-1;                       //month
+        transed += (date[2]-1)*11;                  //day
+        transed += time[0]*11*30;                   //hour
+        transed += time[1]*11*30*23;                //minute
+        transed += time[2]*11*30*23*59;             //second
+        transed += (date[0]%100)*11*30*23*59*59;    //year
+
+        let mut hashcode = String::new();
+        while transed>0 {
+            let a = (transed % 62) as u8;
+            match a {
+                0..=9 => hashcode = a.to_string() + &hashcode,
+                10..=35 => hashcode = String::from((a-10+'a' as u8) as char) + &hashcode,
+                36..=61 => hashcode = String::from((a-36+'A' as u8) as char) + &hashcode,
+                _ => {}
+            };
+            transed = transed / 62;
+        }
+        hashcode
     }
 
     fn rsave(&mut self) -> Result<(), Error> {
@@ -243,12 +274,12 @@ impl<'a, T: IOManager> Manager<'a, T> {
 
         for (index, p) in infos[start..=end].iter().enumerate() {
             let time_str = format!(
-                "{}-{}-{} {}:{}:{}",
+                "{:04}-{:02}-{:02}  {:02}:{:02}:{:02}",
                 p.date[0], p.date[1], p.date[2], p.time[0], p.time[1], p.time[2]
             );
             outln_log!(
                 self.logger,
-                "[{}] {}\t{}\t{}",
+                "[{}]  {}\t{}\t\t\t{}",
                 index + 1,
                 time_str,
                 &p.name,

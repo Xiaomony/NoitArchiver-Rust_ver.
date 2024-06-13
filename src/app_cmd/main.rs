@@ -1,8 +1,8 @@
 #[macro_use(out, outln_err, outln_warn)]
 //out_err, out_log, out_suc, out_warn, outln, outln_log, outln_suc
-extern crate noita_archive_manager;
-use noita_archive_manager::utils::io_manager::IOManager;
-use noita_archive_manager::Manager;
+extern crate noitarchiver_core;
+use noitarchiver_core::utils::io_manager::IOManager;
+use noitarchiver_core::Manager;
 
 mod io_commandline;
 use io_commandline::IOCommandLine;

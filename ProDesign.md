@@ -53,7 +53,7 @@
 
   目前想到的问题，最初开发阶段不处理：
   
-  1. 存档文件夹以存档名命名，因此有重名问题、quicksave的存档名如何处理(quicksave的存档名处理准备采用hashcode)
+  1. ~~存档文件夹以存档名命名，因此有重名问题、quicksave的存档名如何处理(quicksave的存档名处理准备采用hashcode)~~
   2. ~~Error处理混乱、unwrap()与?随意混用~~
   3. 简单函数的inline标注
   4. 目前输入中文时可能会有部分问题，有可能是replit的shell导致的，等移植到windows下再测试

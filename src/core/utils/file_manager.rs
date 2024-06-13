@@ -186,6 +186,7 @@ impl<'a, T: IOManager> FileManager<'a, T> {
 
         let arch_name = &self.get_archive_infos()[index].name;
         let src = self.path_to_archive_forlder.join(arch_name);
+        fs::remove_dir_all(&self.path_to_noita_archive).with_moreinfo("删除旧文件夹失败,请尝试手动删除")?;
         Self::copy_file(&src, &self.path_to_noita_archive).with_moreinfo("复制存档文件夹失败")?;
         Ok(())
     }

@@ -1,4 +1,4 @@
-use noita_archive_manager::utils::io_manager::*;
+use noitarchiver_core::utils::io_manager::*;
 use std::fmt::Arguments;
 use std::io::{self, Write};
 use std::process::Command;
