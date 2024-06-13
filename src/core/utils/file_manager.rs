@@ -93,11 +93,11 @@ impl<'a, T: IOManager> JsonManager<'a, T> {
 impl<'a, T: IOManager> FileManager<'a, T> {
     pub fn new(logger: &'a T) -> Result<Self, Error> {
         let arch_path = Self::get_noita_arch_path()
-            .with_moreinfo("获取Noita存档路径失败,请检查Noita是否安装")?;
+            .with_msg("获取Noita存档路径失败,请检查Noita是否安装")?;
         let path_to_infos_json = PathBuf::from("./Archives/infos.json");
         let mut newone = Self {
             json_manager: JsonManager::new(path_to_infos_json.clone(), logger),
-            path_to_noita_archive: PathBuf::from(arch_path),
+            path_to_noita_archive: arch_path,
             path_to_archive_forlder: PathBuf::from("./Archives"),
             path_to_infos_json,
             logger,
@@ -115,8 +115,13 @@ impl<'a, T: IOManager> FileManager<'a, T> {
         }
         Ok(())
     }
-    fn get_noita_arch_path() -> Result<String, Error> {
-        Ok("./NoitaArch".to_string())
+    fn get_noita_arch_path() -> Result<PathBuf, Error> {
+        if let Some(appdata) = dirs::data_local_dir() {
+            let locallow_path = appdata.parent().unwrap().join("LocalLow/Nolla_Games_Noita/save00");
+            Ok(locallow_path)
+        } else {
+            Err(Error::GeneralError("".to_string()))
+        }
     }
 
     pub fn get_archive_infos(&self) -> &Vec<ArchiveInfo> {

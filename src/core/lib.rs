@@ -67,7 +67,12 @@ impl<'a, T: IOManager> Manager<'a, T> {
 
     fn clear(&self) -> Result<(), Error> {
         self.logger.io_cls();
-        // let commands = self.file_manager
+        outln_suc!(self.logger, "=======================NoitArchiver v{}=======================", env!("CARGO_PKG_VERSION"));
+
+        let commands = self.com_analyzer.get_command_list();
+        for (index, c) in commands.iter().enumerate() {
+            out!(self.logger, "{}.{}({})\t{}", index+1, c.full_name, c.short_name, c.breif_info);
+        }
         Ok(())
     }
 

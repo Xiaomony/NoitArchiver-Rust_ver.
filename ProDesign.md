@@ -18,7 +18,7 @@
 - Json格式:
 
     ```json
-    {
+    [
       {
         "name": "%ArchiveName%",
         "note": "%ArchiveNote%",
@@ -26,7 +26,7 @@
         "time": [%hour%, %minute%, %second%]
       },
       ...
-    }
+    ]
     ```
 
 ## 代码结构

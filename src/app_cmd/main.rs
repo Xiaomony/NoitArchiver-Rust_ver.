@@ -25,7 +25,13 @@ fn main() {
         puase();
         return;
     }
-    
+
+    if let Err(msg) = manager.run_command("cls") {
+        outln_warn!(logger, "初始化错误\n\t{}", msg);
+        puase();
+        return;
+    }
+
     while manager.is_running() {
         out!(logger, ">>>");
         let input = logger.io_getline();

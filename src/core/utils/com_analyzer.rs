@@ -4,23 +4,22 @@ use super::commands::{CommandID::*, *};
 use super::io_manager::{Error, ResultExt};
 
 pub struct ComMap {
-    full_name: String,
-    short_name: String,
+    pub full_name: String,
+    pub short_name: String,
     id: CommandID,
+    pub breif_info: String,
+    pub detail: String
 }
 impl ComMap {
-    fn new(full_name: &str, short_name: &str, id: CommandID) -> Self {
+    fn new(full_name: &str, short_name: &str, id: CommandID, breif_info: &str, detail: &str) -> Self {
         Self {
             full_name: full_name.to_string(),
             short_name: short_name.to_string(),
             id,
+            breif_info: breif_info.to_string(),
+            detail: detail.to_string()
         }
     }
-}
-macro_rules! comm {
-    ($full_name:expr, $short_name:expr, $id:expr) => {
-        ComMap::new($full_name, $short_name, $id)
-    };
 }
 
 pub struct Analyzer {
@@ -29,25 +28,43 @@ pub struct Analyzer {
 impl Analyzer {
     pub fn new() -> Self {
         let mut comlist: Vec<ComMap> = Vec::new();
-        comlist.push(comm!("clear", "cls", IdClear));
-        comlist.push(comm!("help", "h", IdHelp));
-        comlist.push(comm!("quit", "q", IdQuit));
+        let mut addcom = |full_name, short_name, id, breif_info, detail| {
+            comlist.push(ComMap::new(full_name, short_name, id, breif_info, detail));
+        };
+        addcom("clear", "cls", IdClear, "清屏\t\t",
+            "清除屏幕");
+        addcom("help", "h", IdHelp, "帮助及注意事项\t",
+            "帮助及注意事项");
+        addcom("quit", "q", IdQuit, "退出程序\n\n",
+            "退出程序");
 
-        comlist.push(comm!("save", "s", IdSave(None)));
-        comlist.push(comm!("qsave", "qs", IdQsave));
-        comlist.push(comm!("rsave", "rs", IdRsave(None)));
+        addcom("save", "s", IdSave(None), "保存\t\t",
+            "保存存档");
+        addcom("qsave", "qs", IdQsave, "快速保存\t",
+            "");
+        addcom("rsave", "rs", IdRsave(None), "覆盖式保存\n\n",
+            "");
 
-        comlist.push(comm!("load", "l", IdLoad(None)));
-        comlist.push(comm!("qload", "ql", IdQload));
-        comlist.push(comm!("log", "lg", IdLog));
-        comlist.push(comm!("slog", "sl", IdSlog));
+        addcom("load", "l", IdLoad(None), "读取存档\t",
+            "");
+        addcom("qload", "ql", IdQload, "快速读档\n\n",
+            "");
+        addcom("log", "lg", IdLog, "查看存档信息\t",
+            "");
+        addcom("slog", "sl", IdSlog, "近七次存档信息\n\n",
+            "");
 
-        comlist.push(comm!("modarch", "ma", IdModarch(None)));
-        comlist.push(comm!("del", "d", IdDel(None)));
-        comlist.push(comm!("qdel", "qd", IdQdel));
+        addcom("modarch", "ma", IdModarch(None), "修改存档信息\t",
+            "");
+        addcom("del", "d", IdDel(None), "删除指定存档\t",
+            "");
+        addcom("qdel", "qd", IdQdel, "删除最新存档\n\n",
+            "");
 
-        comlist.push(comm!("usage", "u", IdUsage));
-        comlist.push(comm!("favor", "f", IdFavor));
+        addcom("usage", "u", IdUsage, "查看占用空间\t",
+            "");
+        addcom("favor", "f", IdFavor, "收藏存档\n\n",
+            "");
 
         Self {
             command_list: comlist,
