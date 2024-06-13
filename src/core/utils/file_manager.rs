@@ -28,6 +28,7 @@ impl ArchiveInfo {
             time,
         }
     }
+    #[inline]
     pub fn to_string(&self) -> String {
         format!("[{}-{}-{} {}:{}:{}]  {}",
             self.date[0], self.date[1], self.date[2],
@@ -60,6 +61,7 @@ impl<'a, T: IOManager> JsonManager<'a, T> {
         }
     }
 
+    #[inline]
     pub fn get_archive_infos(&self) -> &Vec<ArchiveInfo> {
         &self.infos
     }
@@ -79,12 +81,15 @@ impl<'a, T: IOManager> JsonManager<'a, T> {
         serde_json::to_writer_pretty(f, &(self.infos)).with_msg("写入备份json文件失败")?;
         Ok(())
     }
+    #[inline]
     pub fn infos_push(&mut self, info: ArchiveInfo) {
         self.infos.push(info);
     }
+    #[inline]
     pub fn infos_del(&mut self, index: usize) {
         self.infos.remove(index);
     }
+    #[inline]
     pub fn infos_modify(&mut self, index: usize, new_info: ArchiveInfo) {
         self.infos[index] = new_info;
     }
@@ -124,9 +129,11 @@ impl<'a, T: IOManager> FileManager<'a, T> {
         }
     }
 
+    #[inline]
     pub fn get_archive_infos(&self) -> &Vec<ArchiveInfo> {
         self.json_manager.get_archive_infos()
     }
+    #[inline]
     pub fn get_archive_infolen(&self) -> usize {
         self.get_archive_infos().len()
     }

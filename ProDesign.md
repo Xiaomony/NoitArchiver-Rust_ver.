@@ -56,13 +56,13 @@
   1. ~~存档文件夹以存档名命名，因此有重名问题、quicksave的存档名如何处理(quicksave的存档名处理准备采用hashcode)~~
   2. ~~Error处理混乱、unwrap()与?随意混用~~
   3. 简单函数的inline标注
-  4. 目前输入中文时可能会有部分问题，有可能是replit的shell导致的，等移植到windows下再测试
-  5. uitls/file_manager.rs/FileManager中的get_noita_path()未实现
+  4. ~~目前输入中文时可能会有部分问题，有可能是replit的shell导致的，等移植到windows下再测试~~
+  5. ~~uitls/file_manager.rs/FileManager中的get_noita_path()未实现~~
   6. 当前阶段未实现的部分内容：
      - ~~main.rs/fn pause()~~
      - ~~io_commandlines.rs/io_cls()需要跨平台~~
      - ~~io_commandlines.rs/io_getint() io_get_comfirm() 需要实现~~
-     - clear help usage favor 四条命令未实现
+     - ~~clear~~ help usage favor 四条命令未实现
      - ~~save load modify_archive del 未在输入命令时传入参数的情况(需后续提示用户输入相关信息)~~
      - ~~load qload del qdel 操作的确认~~
      - uitls/file_manager.rs/JsonManager中的logger未使用

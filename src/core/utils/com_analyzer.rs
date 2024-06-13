@@ -71,6 +71,7 @@ impl Analyzer {
         }
     }
 
+    #[inline]
     pub fn get_command_list(&self) -> &Vec<ComMap> {
         &self.command_list
     }

@@ -26,6 +26,7 @@ impl<'a, T: IOManager> Manager<'a, T> {
             is_running: true,
         })
     }
+    #[inline]
     pub fn is_running(&self) -> bool {
         self.is_running
     }
