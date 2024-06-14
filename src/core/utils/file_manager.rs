@@ -19,6 +19,7 @@ pub struct ArchiveInfo {
     pub note: String,
     pub date: [usize; 3],
     pub time: [usize; 3],
+    is_favored: bool,
 }
 
 // struct OneLineArrayFormatter/*<'a, W: Write>*/ {
@@ -42,6 +43,7 @@ impl ArchiveInfo {
             note: note.to_string(),
             date,
             time,
+            is_favored: false,
         }
     }
     #[inline]
@@ -50,6 +52,14 @@ impl ArchiveInfo {
             self.date[0], self.date[1], self.date[2],
             self.time[0], self.time[1], self.time[2],
             self.name)
+    }
+    #[inline]
+    pub fn get_is_favored(&self) -> bool {
+        self.is_favored
+    }
+    #[inline]
+    pub fn set_favored(&mut self, state: bool) {
+        self.is_favored = state;
     }
 }
 
@@ -80,6 +90,10 @@ impl<'a, T: IOManager> JsonManager<'a, T> {
     #[inline]
     pub fn get_archive_infos(&self) -> &Vec<ArchiveInfo> {
         &self.infos
+    }
+    #[inline]
+    pub fn get_archive_mutinfos(&mut self) -> &mut Vec<ArchiveInfo> {
+        &mut self.infos
     }
 
     pub fn load_json(&mut self) -> Result<(), Error> {
@@ -151,6 +165,10 @@ impl<'a, T: IOManager> FileManager<'a, T> {
     #[inline]
     pub fn get_archive_infos(&self) -> &Vec<ArchiveInfo> {
         self.json_manager.get_archive_infos()
+    }
+    #[inline]
+    pub fn get_archive_mutinfos(&mut self) -> &mut Vec<ArchiveInfo> {
+        self.json_manager.get_archive_mutinfos()
     }
     #[inline]
     pub fn get_archive_infolen(&self) -> usize {
@@ -238,4 +256,29 @@ impl<'a, T: IOManager> FileManager<'a, T> {
         }
         Ok(())
     }
+    #[inline]
+    pub fn save_json(&self) -> Result<(), Error> {
+        self.json_manager.write_json()
+    }
+
+    pub fn get_usage(&self) -> Result<f64, Error> {
+        let size = Self::caculate_usage(&self.path_to_archive_forlder)?;
+        Ok(size)
+    }
+    fn caculate_usage(path: &Path) -> Result<f64, Error> {
+        let mut total_size = 0 as f64;
+    
+        for entry in fs::read_dir(path)? {
+            let entry = entry?;
+            let metadata = entry.metadata()?;
+    
+            if metadata.is_dir() {
+                total_size += Self::caculate_usage(&entry.path())?;
+            } else {
+                total_size += metadata.len() as f64 / 1_048_576.0;
+            }
+        }
+    
+        Ok(total_size)
+    }    
 }

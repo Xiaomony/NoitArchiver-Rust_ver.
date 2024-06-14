@@ -46,6 +46,7 @@ impl<'a, T: IOManager> Manager<'a, T> {
                 请输入存档名(直接换行则取消保存):存档 1
                 请输入存档备注(直接换行则不填):存档备注
                 保存成功
+    3.使用favor命令收藏的存档不可进行任何修改，请先使用unfavor取消对其收藏才能修改
 ---------------------------------------------------------------";
     pub fn new(logger: &'a T) -> Result<Self, Error> {
         let com_analyzer = com_analyzer::Analyzer::new();
@@ -80,19 +81,21 @@ impl<'a, T: IOManager> Manager<'a, T> {
             IdQuit => self.quit(),
 
             IdSave(opt) => self.save(opt),
-            IdQsave => self.qsave(), //
+            IdQsave => self.qsave(),
             IdRsave(_) => self.rsave(),
 
             IdLoad(opt) => self.load(opt),
-            IdQload => self.qload(), //
+            IdQload => self.qload(),
             IdLog => self.log(0..=getlen() - 1),
             IdSlog => self.log(getlen() - 7..=getlen() - 1),
 
             IdModarch(opt) => self.modify_archive(opt),
             IdDel(opt) => self.del(opt),
-            IdQdel => self.qdel(), //
+            IdQdel => self.qdel(),
+
+            IdFavor(opt) => self.favor(opt, true),
+            IdUnfavor(opt) => self.favor(opt, false),
             IdUsage => self.usage(),
-            IdFavor => self.favor(),
         }?;
         Ok(())
     }
@@ -220,8 +223,18 @@ impl<'a, T: IOManager> Manager<'a, T> {
     }
 
     fn rsave(&mut self) -> Result<(), Error> {
+        let mut last = self.file_manager.get_archive_infolen();
+        if last == 0 {
+            outln_warn!(self.logger, "无存档");
+            return Ok(());
+        }
+        last -= 1;
         let infos = self.file_manager.get_archive_infos();
-        let last = infos.len() - 1;
+        if infos[last].get_is_favored() {
+            outln_warn!(self.logger, "存档被收藏,无法修改");
+            return Ok(());
+        }
+
         out_warn!(self.logger, "此操作会覆盖存档 \"{}\" 请确认(y/n):", infos[last].to_string());
         if !self.logger.io_comfirm() {
             outln_log!(self.logger, "取消存档");
@@ -320,20 +333,31 @@ impl<'a, T: IOManager> Manager<'a, T> {
         } else {
             *range.end() as usize
         };
-
+        outln_log!(self.logger, "收藏的存档使用*标注");
         for (index, p) in infos[start..=end].iter().enumerate() {
             let time_str = format!(
                 "{:04}-{:02}-{:02}  {:02}:{:02}:{:02}",
                 p.date[0], p.date[1], p.date[2], p.time[0], p.time[1], p.time[2]
             );
-            outln_log!(
-                self.logger,
-                "[{}]  {}\t{}\t\t{}",
-                index + 1,
-                time_str,
-                &p.name,
-                &p.note
-            );
+            if p.get_is_favored() {
+                outln_suc!(
+                    self.logger,
+                    "[{}]* {}\t{}\t\t{}",
+                    index + 1,
+                    time_str,
+                    &p.name,
+                    &p.note
+                    );
+            } else {
+                outln_log!(
+                    self.logger,
+                    "[{}]  {}\t{}\t\t{}",
+                    index + 1,
+                    time_str,
+                    &p.name,
+                    &p.note
+                    );
+            }
         }
         Ok(())
     }
@@ -366,6 +390,11 @@ impl<'a, T: IOManager> Manager<'a, T> {
             return Ok(());
         }
         let old_info = &self.file_manager.get_archive_infos()[para.index];
+        if old_info.get_is_favored() {
+            outln_warn!(self.logger, "存档被收藏,无法修改");
+            return Ok(());
+        }
+
         if para.info.arch_note.is_empty() {
             para.info.arch_note = old_info.note.clone();
         }
@@ -402,6 +431,11 @@ impl<'a, T: IOManager> Manager<'a, T> {
             outln_warn!(self.logger, "存档编号{}不存在", para.index);
             return Ok(());
         }
+        if self.file_manager.get_archive_infos()[para.index].get_is_favored() {
+            outln_warn!(self.logger, "存档被收藏,无法修改");
+            return Ok(());
+        }
+
         out_warn!(self.logger, "此操作会删除存档 \"{}\" 请确认(y/n):",
             self.file_manager.get_archive_infos()[para.index].to_string());
         if !self.logger.io_comfirm() {
@@ -424,6 +458,10 @@ impl<'a, T: IOManager> Manager<'a, T> {
         }
         
         last -= 1;
+        if self.file_manager.get_archive_infos()[last].get_is_favored() {
+            outln_warn!(self.logger, "存档被收藏,无法修改");
+            return Ok(());
+        }
         out_warn!(self.logger, "此操作会用删除存档 \"{}\" 请确认(y/n):",
             self.file_manager.get_archive_infos()[last].to_string());
         if !self.logger.io_comfirm() {
@@ -431,17 +469,44 @@ impl<'a, T: IOManager> Manager<'a, T> {
         }
 
         self.file_manager
-            .del(last - 1)
+            .del(last)
             .with_moreinfo("删除存档失败")?;
         outln_suc!(self.logger, "删除成功");
         Ok(())
     }
 
     fn usage(&self) -> Result<(), Error> {
+        let usage = self.file_manager.get_usage()?;
+        outln_log!(self.logger, "占用大小: {:.2} MB", usage);
         Ok(())
     }
 
-    fn favor(&self) -> Result<(), Error> {
+    fn favor(&mut self, opt: Option<Favor>, state: bool) -> Result<(), Error> {
+        let para;
+        match opt {
+            Some(_) => para = opt.unwrap(),
+            None => {
+                out!(self.logger, "请输入存档编号(直接换行则取消删除):");
+                if let Some(index) = self.logger.io_getint(){
+                    para = Favor::new((index - 1) as usize);
+                } else {
+                    outln_log!(self.logger, "取消");
+                    return Ok(());
+                }
+            }
+        };
+        
+        if para.index >= self.file_manager.get_archive_infolen() {
+            outln_warn!(self.logger, "存档编号{}不存在", para.index);
+            return Ok(());
+        }
+        self.file_manager.get_archive_mutinfos()[para.index].set_favored(state);
+        self.file_manager.save_json()?;
+        if state {
+            outln_suc!(self.logger, "收藏成功");
+        } else {
+            outln_suc!(self.logger, "取消收藏成功");
+        }
         Ok(())
     }
 }

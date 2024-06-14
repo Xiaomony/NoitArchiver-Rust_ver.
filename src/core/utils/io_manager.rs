@@ -56,13 +56,13 @@ macro_rules! outln_log {
 // out suc
 #[macro_export]
 macro_rules! out_suc {
-    ($logger:expr,$format_str:expr $(, $arg:expr),*) => {
+    ($logger:expr,$format_str:expr $(, $arg:expr)*) => {
         $logger.io_print_suc(format_args!($format_str, $($arg),*))
     };
 }
 #[macro_export]
 macro_rules! outln_suc {
-    ($logger:expr,$format_str:expr $(, $arg:expr),*) => {
+    ($logger:expr,$format_str:expr $(, $arg:expr)*) => {
         $logger.io_print_suc(format_args!(concat!($format_str, "\n"), $($arg),*))
     };
 }

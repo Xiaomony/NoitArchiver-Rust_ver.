@@ -42,29 +42,33 @@ impl Analyzer {
             "保存存档(存档名不能与已有存档重名)\n\t命令参数用法: save/s [存档名] [存档备注]\n\t存档备注可不填(默认为空)");
         addcom("qsave", "qs", IdQsave, "快速保存\t",
             "快速保存(存档名会以\"qsave_ + 生成的标识码\"的格式命名)");
-        addcom("rsave", "rs", IdRsave(None), "覆盖式保存\n\n",
+        addcom("rsave", "rs", IdRsave(None), "覆盖式保存\n",
             "覆盖最新的一次存档(存档名和存档备注不变,更新存档日期)");
 
         addcom("load", "l", IdLoad(None), "读取存档\t",
             "读取存档\n\t命令参数用法: load/l [编号]");
-        addcom("qload", "ql", IdQload, "快速读档\n\n",
+        addcom("qload", "ql", IdQload, "快速读档\n",
             "读取最新的一次存档");
+
         addcom("log", "lg", IdLog, "查看存档信息\t",
             "查看存档信息");
-        addcom("slog", "sl", IdSlog, "近七次存档信息\n\n",
+        addcom("slog", "sl", IdSlog, "近七次存档信息\t",
             "仅查看最近七次的存档信息");
-
-        addcom("modarch", "ma", IdModarch(None), "修改存档信息\t",
+        addcom("modarch", "ma", IdModarch(None), "修改存档信息\n",
             "修改存档信息\n\t命令参数用法: modarch/ma [编号] [新存档名] [新备注]\n\t存档备注可不填(不填则保持旧的存档备注不变)");
+        
         addcom("del", "d", IdDel(None), "删除指定存档\t",
             "删除存档\n\t命令参数用法: del/d [编号]");
-        addcom("qdel", "qd", IdQdel, "删除最新存档\n\n",
+        addcom("qdel", "qd", IdQdel, "删除最新存档\n",
             "删除最新的一次存档");
 
-        addcom("usage", "u", IdUsage, "查看占用空间\t",
+        addcom("favor", "f", IdFavor(None), "收藏存档\t",
+            "收藏存档(使用favor命令收藏的存档不可进行任何修改，请先使用unfavor取消对其收藏才能修改)\n\t命令参数用法: favor/f [编号]");
+        addcom("unfavor", "unf", IdUnfavor(None), "取消收藏\n\n",
+            "取消收藏\n\t命令参数用法: unfavor/unf [编号]");
+        
+        addcom("usage", "use", IdUsage, "查看占用空间\n",
             "查看占用空间");
-        addcom("favor", "f", IdFavor, "收藏存档\n\n",
-            "收藏存档\n\t命令参数用法: favor/f [编号]");
 
         Self {
             command_list: comlist,
@@ -182,6 +186,16 @@ impl Analyzer {
             Ok(())
         };
 
+        let get_para_favor = |opt: &mut Option<_>| -> Result<(), Error> {
+            if parts.len() <= 1 {
+                *opt = None;
+                return Ok(());
+            }
+            let index = parts[1].parse::<usize>().with_msg("命令格式错误")?;
+            *opt = Some(Favor::new(index - 1));
+            Ok(())
+        };
+
         match id {
             IdHelp(ref mut opt) => {
                 if parts.len() >= 2 {
@@ -203,6 +217,9 @@ impl Analyzer {
 
             IdModarch(ref mut opt) => get_para_modify(&mut *opt),
             IdDel(ref mut opt) => get_para_del(&mut *opt),
+
+            IdFavor(ref mut opt) | IdUnfavor(ref mut opt) =>
+                get_para_favor(&mut *opt),
             _ => Ok(()),
         }?;
         Ok(id)

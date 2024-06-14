@@ -19,8 +19,9 @@ pub enum CommandID {
     IdDel(Option<Del>),
     IdQdel,
 
+    IdFavor(Option<Favor>),
+    IdUnfavor(Option<Favor>),
     IdUsage,
-    IdFavor,
 }
 
 #[derive(Clone, Debug)]
@@ -42,6 +43,11 @@ pub struct Load {
 
 #[derive(Clone, Debug)]
 pub struct Del {
+    pub index: usize,
+}
+
+#[derive(Clone, Debug)]
+pub struct Favor {
     pub index: usize,
 }
 
@@ -72,5 +78,11 @@ impl Load {
 impl Del {
     pub fn new(index: usize) -> Self {
         Self { index }
+    }
+}
+
+impl Favor {
+    pub fn new(index: usize) -> Self {
+        Self {index}
     }
 }
