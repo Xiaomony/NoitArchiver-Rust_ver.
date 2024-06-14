@@ -3,6 +3,7 @@ name = "NoitArchiver"
 version = "2.1.0"
 authors = ["runner"]
 edition = "2021"
+build = "build.rs"
 
 [lib]
 name = "noitarchiver_core"
@@ -20,3 +21,6 @@ colored = "2.1.0"
 dirs = "5.0.1"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0.117"
+
+[build-dependencies]
+winres = "0.1.12"

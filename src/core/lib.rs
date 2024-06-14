@@ -68,12 +68,14 @@ impl<'a, T: IOManager> Manager<'a, T> {
 
     fn clear(&self) -> Result<(), Error> {
         self.logger.io_cls();
-        outln_suc!(self.logger, "=======================NoitArchiver v{}=======================", env!("CARGO_PKG_VERSION"));
-
+        outln_suc!(self.logger, "================================NoitArchiver v{}================================", env!("CARGO_PKG_VERSION"));
+        
         let commands = self.com_analyzer.get_command_list();
         for (index, c) in commands.iter().enumerate() {
             out!(self.logger, "{}.{}({})\t{}", index+1, c.full_name, c.short_name, c.breif_info);
-        }
+            }
+
+        outln_suc!(self.logger, "==================================================================================");
         Ok(())
     }
 
@@ -256,8 +258,10 @@ impl<'a, T: IOManager> Manager<'a, T> {
         }
 
         self.file_manager
-            .load(last - 1)
+            .load(last)
             .with_moreinfo("快速读档失败")?;
+
+        outln_suc!(self.logger, "读档成功");
         Ok(())
     }
 
@@ -285,7 +289,7 @@ impl<'a, T: IOManager> Manager<'a, T> {
             );
             outln_log!(
                 self.logger,
-                "[{}]  {}\t{}\t\t\t{}",
+                "[{}]  {}\t{}\t\t{}",
                 index + 1,
                 time_str,
                 &p.name,
