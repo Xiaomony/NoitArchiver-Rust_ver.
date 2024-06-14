@@ -33,38 +33,38 @@ impl Analyzer {
         };
         addcom("clear", "cls", IdClear, "清屏\t\t",
             "清除屏幕");
-        addcom("help", "h", IdHelp, "帮助及注意事项\t",
-            "帮助及注意事项");
+        addcom("help", "h", IdHelp(None), "帮助及注意事项\t",
+            "查看帮助及注意事项, 请用 \"help/h [命令(全写或缩写)]\" 查看某个命令的说明及用法");
         addcom("quit", "q", IdQuit, "退出程序\n\n",
             "退出程序");
 
         addcom("save", "s", IdSave(None), "保存\t\t",
-            "保存存档");
+            "保存存档(存档名不能与已有存档重名)\n\t命令参数用法: save/s [存档名] [存档备注]\n\t存档备注可不填(默认为空)");
         addcom("qsave", "qs", IdQsave, "快速保存\t",
-            "");
+            "快速保存(存档名会以\"qsave_ + 生成的标识码\"的格式命名)");
         addcom("rsave", "rs", IdRsave(None), "覆盖式保存\n\n",
-            "");
+            "覆盖最新的一次存档(存档名和存档备注不变,更新存档日期)");
 
         addcom("load", "l", IdLoad(None), "读取存档\t",
-            "");
+            "读取存档\n\t命令参数用法: load/l [编号]");
         addcom("qload", "ql", IdQload, "快速读档\n\n",
-            "");
+            "读取最新的一次存档");
         addcom("log", "lg", IdLog, "查看存档信息\t",
-            "");
+            "查看存档信息");
         addcom("slog", "sl", IdSlog, "近七次存档信息\n\n",
-            "");
+            "仅查看最近七次的存档信息");
 
         addcom("modarch", "ma", IdModarch(None), "修改存档信息\t",
-            "");
+            "修改存档信息\n\t命令参数用法: modarch/ma [编号] [新存档名] [新备注]\n\t存档备注可不填(不填则保持旧的存档备注不变)");
         addcom("del", "d", IdDel(None), "删除指定存档\t",
-            "");
+            "删除存档\n\t命令参数用法: del/d [编号]");
         addcom("qdel", "qd", IdQdel, "删除最新存档\n\n",
-            "");
+            "删除最新的一次存档");
 
         addcom("usage", "u", IdUsage, "查看占用空间\t",
-            "");
+            "查看占用空间");
         addcom("favor", "f", IdFavor, "收藏存档\n\n",
-            "");
+            "收藏存档\n\t命令参数用法: favor/f [编号]");
 
         Self {
             command_list: comlist,
@@ -183,6 +183,18 @@ impl Analyzer {
         };
 
         match id {
+            IdHelp(ref mut opt) => {
+                if parts.len() >= 2 {
+                    if let Some(com) =
+                        self.command_list.iter().find(|x| (**x).full_name==parts[1]||(**x).short_name==parts[1]) {
+                            *opt = Some((com.full_name.clone(), com.short_name.clone(), com.detail.clone()));
+                    } else {
+                        return Err(Error::GeneralError("未找到命令".to_string()))
+                    }
+                }
+                Ok(())
+            }
+
             IdSave(ref mut opt) => {
                 get_para_save(&mut *opt);
                 Ok(())

@@ -16,6 +16,37 @@ pub struct Manager<'a, T: IOManager> {
 }
 
 impl<'a, T: IOManager> Manager<'a, T> {
+    const HELP_MSG:&'static str =
+"---------------------------------------------------------------
+本程序gitHub主页及更详细的readme文档：https://github.com/Xiaomony/NoitArchiver-Rust_ver.
+
+由于NoitaArchiveManager旧版本（C++版）出现了各种问题，现使用Rust重写了新版本
+（本程序旧版本的地址：https://github.com/Xiaomony/NoitaArchiveManager）
+
+使用说明：
+    1.本程序运行时会在程序所在目录下建立一个Archives文件夹用于存储日志文件和保存的存档,请勿删除(若删除,则相当于恢复程序第一次运行的状态)
+    2.建议将程序放在磁盘中的某个文件夹下,再发送到桌面快捷方式使用(避免程序在桌面创建Archive文件夹后被误删)
+    3.请在Noita主界面有\"继续\"这一选项时读取存档,若没有则请先\"新游戏\"后再关闭游戏读档,重新打开后再点击\"继续\"
+    4.建议关闭Steam云存档
+    5.请在Noita正常保存、关闭后再进行存档
+    (游戏进行中存档的话保存的是Noita的自动存档,可能是几分钟前的存档,并非保存时的存档)
+    6.游戏进行中请勿读取存档
+    7.随着游戏的进行,每次存档所用的时间和占用的空间也会不断增大,请耐心等待
+
+命令说明：
+    1.使用  help+命令  的形式查看某条命令的说明及用法
+    2.新版本的命令有两种使用方式：命令参数模式和普通模式
+        - 命令参数模式：使用类型命令行的方法进行操作，如
+                save 存档1 存档备注
+            在输入命令的同时将其参数一同输入，每个参数用空格隔开，如果存档名、存档备注等任何参数中含有空格，请用  英文引号（不要用中文引号）  将参数括起来
+                save \"存档 1\" \"存档  备注\"
+            每个命令的命令参数模式的格式不同，请用  help+命令  的形式查看某条命令的说明及用法
+        - 普通模式：如同旧版本一样，先输入命令，再根据程序的提示输入参数，如
+                >>>save
+                请输入存档名(直接换行则取消保存):存档 1
+                请输入存档备注(直接换行则不填):存档备注
+                保存成功
+---------------------------------------------------------------";
     pub fn new(logger: &'a T) -> Result<Self, Error> {
         let com_analyzer = com_analyzer::Analyzer::new();
         let file_manager = file_manager::FileManager::new(logger)?;
@@ -45,7 +76,7 @@ impl<'a, T: IOManager> Manager<'a, T> {
 
         match id {
             IdClear => self.clear(),
-            IdHelp => self.help(),
+            IdHelp(ref opt) => self.help(opt),
             IdQuit => self.quit(),
 
             IdSave(opt) => self.save(opt),
@@ -79,8 +110,16 @@ impl<'a, T: IOManager> Manager<'a, T> {
         Ok(())
     }
 
-    fn help(&self) -> Result<(), Error> {
-        out!(self.logger, "help {}", 10);
+    fn help(&self, opt: &Option<(String, String, String)>) -> Result<(), Error> {
+        match opt {
+            None => {
+                outln_log!(self.logger, "{}", Self::HELP_MSG);
+                outln_suc!(self.logger, "本程序相关说明及介绍视频:");
+            }
+            Some((full_name, short_name, detail)) => {
+                outln_log!(self.logger, "\t[{}] ({})\n\t{}", full_name, short_name, detail);
+            }
+        }
         Ok(())
     }
 
@@ -300,7 +339,7 @@ impl<'a, T: IOManager> Manager<'a, T> {
     }
 
     fn modify_archive(&mut self, opt: Option<Modify>) -> Result<(), Error> {
-        let para;
+        let mut para;
         match opt {
             Some(_) => para = opt.unwrap(),
             None => {
@@ -312,7 +351,7 @@ impl<'a, T: IOManager> Manager<'a, T> {
                         outln_log!(self.logger, "取消修改");
                         return Ok(());
                     }
-                    out!(self.logger, "请输入存档备注(直接换行则不填):");
+                    out!(self.logger, "请输入存档备注(直接换行则保持不变):");
                     let arch_note = self.logger.io_getline().trim().to_string();
                     para = Modify::new((index - 1) as usize, &arch_name,&arch_note);
                 } else {
@@ -326,8 +365,10 @@ impl<'a, T: IOManager> Manager<'a, T> {
             outln_warn!(self.logger, "存档编号{}不存在", para.index);
             return Ok(());
         }
-        
         let old_info = &self.file_manager.get_archive_infos()[para.index];
+        if para.info.arch_note.is_empty() {
+            para.info.arch_note = old_info.note.clone();
+        }
         let new_info = file_manager::ArchiveInfo::new(
             &para.info.arch_name,
             &para.info.arch_note,

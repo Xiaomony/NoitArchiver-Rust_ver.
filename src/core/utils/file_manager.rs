@@ -3,12 +3,14 @@ use crate::outln_warn;
 
 use serde::{Deserialize, Serialize};
 use serde_json;
-//use std::fmt::format;
-//use serde_json::ser::PrettyFormatter;
+//use serde_json::ser::Formatter;
+//use serde_json::Serializer;
+
 use std::fs;
 use std::fs::File;
 use std::io::prelude::*;
 use std::io::BufReader;
+//use std::io::BufWriter;
 use std::path::{Path, PathBuf};
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -18,6 +20,20 @@ pub struct ArchiveInfo {
     pub date: [usize; 3],
     pub time: [usize; 3],
 }
+
+// struct OneLineArrayFormatter/*<'a, W: Write>*/ {
+//     //inner: &'a mut W,
+// }
+
+// impl Formatter for OneLineArrayFormatter {
+//     fn begin_array_value<W>(&mut self, writer: &mut W, first: bool) -> std::io::Result<()>
+//     where
+//         W: ?Sized + std::io::Write,
+//     {
+//         writer.write_all(if first { b"" } else { b"," })
+//         //indent(writer, self.current_indent, self.indent)
+//     }
+// }
 
 impl ArchiveInfo {
     pub fn new(name: &str, note: &str, date: [usize; 3], time: [usize; 3]) -> Self {
@@ -79,6 +95,9 @@ impl<'a, T: IOManager> JsonManager<'a, T> {
         let f = File::create(&self.path_to_json).with_moreinfo("打开备份json文件失败")?;
         // ***********here needs to be pretty formatter***********
         serde_json::to_writer_pretty(f, &(self.infos)).with_msg("写入备份json文件失败")?;
+        // let writer = BufWriter::new(f);
+        // let mut ser = Serializer::with_formatter(writer, OneLineArrayFormatter{});
+        // self.infos.serialize(&mut ser).with_msg("写入备份json文件失败")?;
         Ok(())
     }
     #[inline]

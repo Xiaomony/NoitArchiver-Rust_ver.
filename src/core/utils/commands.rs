@@ -3,7 +3,7 @@
 #[derive(Debug, Clone)]
 pub enum CommandID {
     IdClear,
-    IdHelp,
+    IdHelp(Option<(String, String, String)>),
     IdQuit,
 
     IdSave(Option<Save>),

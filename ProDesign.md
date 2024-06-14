@@ -62,7 +62,7 @@
      - ~~main.rs/fn pause()~~
      - ~~io_commandlines.rs/io_cls()需要跨平台~~
      - ~~io_commandlines.rs/io_getint() io_get_comfirm() 需要实现~~
-     - ~~clear~~ help usage favor 四条命令未实现
+     - ~~clear help~~ usage favor 四条命令未实现
      - ~~save load modify_archive del 未在输入命令时传入参数的情况(需后续提示用户输入相关信息)~~
      - ~~load qload del qdel 操作的确认~~
      - uitls/file_manager.rs/JsonManager中的logger未使用
