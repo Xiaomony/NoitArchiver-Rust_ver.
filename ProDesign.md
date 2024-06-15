@@ -23,7 +23,8 @@
         "name": "%ArchiveName%",
         "note": "%ArchiveNote%",
         "date": [%year%, %month%, %day%],
-        "time": [%hour%, %minute%, %second%]
+        "time": [%hour%, %minute%, %second%],
+        "is_favored": false
       },
       ...
     ]

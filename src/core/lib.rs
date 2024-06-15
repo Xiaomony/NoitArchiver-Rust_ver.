@@ -36,7 +36,7 @@ impl<'a, T: IOManager> Manager<'a, T> {
 命令说明：
     1.使用  help+命令  的形式查看某条命令的说明及用法
     2.新版本的命令有两种使用方式：命令参数模式和普通模式
-        - 命令参数模式：使用类型命令行的方法进行操作，如
+        - 命令参数模式：使用类似命令行的方法进行操作，如
                 save 存档1 存档备注
             在输入命令的同时将其参数一同输入，每个参数用空格隔开，如果存档名、存档备注等任何参数中含有空格，请用  英文引号（不要用中文引号）  将参数括起来
                 save \"存档 1\" \"存档  备注\"
@@ -102,14 +102,14 @@ impl<'a, T: IOManager> Manager<'a, T> {
 
     fn clear(&self) -> Result<(), Error> {
         self.logger.io_cls();
-        outln_suc!(self.logger, "================================NoitArchiver v{}================================", env!("CARGO_PKG_VERSION"));
+        outln_suc!(self.logger, "==================================NoitArchiver v{}==================================", env!("CARGO_PKG_VERSION"));
         
         let commands = self.com_analyzer.get_command_list();
         for (index, c) in commands.iter().enumerate() {
             out!(self.logger, "{}.{}({})\t{}", index+1, c.full_name, c.short_name, c.breif_info);
             }
 
-        outln_suc!(self.logger, "==================================================================================");
+        outln_suc!(self.logger, "=======================================================================================");
         Ok(())
     }
 
@@ -238,6 +238,7 @@ impl<'a, T: IOManager> Manager<'a, T> {
         out_warn!(self.logger, "此操作会覆盖存档 \"{}\" 请确认(y/n):", infos[last].to_string());
         if !self.logger.io_comfirm() {
             outln_log!(self.logger, "取消存档");
+            return Ok(());
         }
         let time = Local::now();
         let new_info = file_manager::ArchiveInfo::new(
@@ -284,7 +285,8 @@ impl<'a, T: IOManager> Manager<'a, T> {
         out_warn!(self.logger, "此操作会用存档 \"{}\" 覆盖现有存档,请确认(y/n):",
             self.file_manager.get_archive_infos()[para.index].to_string());
         if !self.logger.io_comfirm() {
-            outln_log!(self.logger, "取消存档");
+            outln_log!(self.logger, "取消读档");
+            return Ok(());
         }
 
         self.file_manager
@@ -306,7 +308,8 @@ impl<'a, T: IOManager> Manager<'a, T> {
         out_warn!(self.logger, "此操作会用存档 \"{}\" 覆盖现有存档,请确认(y/n):",
             self.file_manager.get_archive_infos()[last].to_string());
         if !self.logger.io_comfirm() {
-            outln_log!(self.logger, "取消存档");
+            outln_log!(self.logger, "取消读档");
+            return Ok(());
         }
 
         self.file_manager
@@ -343,7 +346,7 @@ impl<'a, T: IOManager> Manager<'a, T> {
                 outln_suc!(
                     self.logger,
                     "[{}]* {}\t{}\t\t{}",
-                    index + 1,
+                    start + index + 1,
                     time_str,
                     &p.name,
                     &p.note
@@ -352,7 +355,7 @@ impl<'a, T: IOManager> Manager<'a, T> {
                 outln_log!(
                     self.logger,
                     "[{}]  {}\t{}\t\t{}",
-                    index + 1,
+                    start + index + 1,
                     time_str,
                     &p.name,
                     &p.note
@@ -439,7 +442,8 @@ impl<'a, T: IOManager> Manager<'a, T> {
         out_warn!(self.logger, "此操作会删除存档 \"{}\" 请确认(y/n):",
             self.file_manager.get_archive_infos()[para.index].to_string());
         if !self.logger.io_comfirm() {
-            outln_log!(self.logger, "取消存档");
+            outln_log!(self.logger, "取消删除");
+            return Ok(());
         }
 
         self.file_manager
@@ -465,7 +469,8 @@ impl<'a, T: IOManager> Manager<'a, T> {
         out_warn!(self.logger, "此操作会用删除存档 \"{}\" 请确认(y/n):",
             self.file_manager.get_archive_infos()[last].to_string());
         if !self.logger.io_comfirm() {
-            outln_log!(self.logger, "取消存档");
+            outln_log!(self.logger, "取消删除");
+            return Ok(());
         }
 
         self.file_manager

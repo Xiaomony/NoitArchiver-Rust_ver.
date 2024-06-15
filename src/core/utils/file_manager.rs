@@ -101,7 +101,8 @@ impl<'a, T: IOManager> JsonManager<'a, T> {
             .with_moreinfo("打开备份信息文件(./Archives/infos.json)失败")?;
         let reader = BufReader::new(f);
         self.infos = serde_json::from_reader(reader).with_msg(
-            "读取存档信息文件失败\n可能为Json文件格式错误,尝试手动修复./Archives/infos.json或删除Archive文件夹(删除Archive文件夹会导致存档的丢失！！！)"
+            "读取存档信息文件失败\n可能为Json文件格式错误,尝试手动修复./Archives/infos.json(详见本程序gitHub主页的说明文档: https://github.com/Xiaomony/NoitArchiver-Rust_ver.)
+\n或删除Archive文件夹(删除Archive文件夹会导致存档的丢失！！！)"
         )?;
         Ok(())
     }
