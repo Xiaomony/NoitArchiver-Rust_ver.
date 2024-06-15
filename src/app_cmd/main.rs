@@ -19,11 +19,14 @@ fn main() {
             .expect("fail to wait a press");
     };
 
-    if let Ok(m) = Manager::new(&logger) {
-        manager = m;
-    } else {
-        puase();
-        return;
+
+    match Manager::new(&logger) {
+        Ok(m) => manager = m,
+        Err(e) => {
+            outln_warn!(logger, "{}", e);
+            puase();
+            return;
+        }
     }
 
     if let Err(msg) = manager.run_command("cls") {
