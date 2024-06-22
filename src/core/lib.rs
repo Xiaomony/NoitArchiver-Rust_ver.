@@ -435,7 +435,8 @@ impl<'a, T: IOManager> Manager<'a, T> {
         paras.indexs.sort_by(|a, b| b.cmp(a));
         paras.indexs.dedup();
         if !comfirm {
-            out_warn!(self.logger, "此操作会删除存档 \"{:?}\" 请确认(y/n):",paras.indexs);
+            let index_add1:Vec<usize> = paras.indexs.iter().map(|x| x+1).collect();
+            out_warn!(self.logger, "此操作会删除存档 \"{:?}\" 请确认(y/n):",index_add1);
             if !self.logger.io_comfirm() {
                 outln_log!(self.logger, "取消删除");
                 return Ok(());
@@ -443,11 +444,11 @@ impl<'a, T: IOManager> Manager<'a, T> {
         }
         for index in paras.indexs {
             if index >= self.file_manager.get_archive_infolen() {
-                outln_warn!(self.logger, "存档编号{}不存在", index);
+                outln_warn!(self.logger, "存档编号[{}]不存在", index+1);
                 return Ok(());
             }
             if self.file_manager.get_archive_infos()[index].get_is_favored() {
-                outln_warn!(self.logger, "存档[{}]被收藏,无法操作", index);
+                outln_warn!(self.logger, "存档[{}]被收藏,无法操作", index+1);
                 return Ok(());
             }
     
