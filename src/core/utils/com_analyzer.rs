@@ -58,7 +58,8 @@ impl Analyzer {
             "修改存档信息\n\t命令参数用法: modarch/ma [编号] [新存档名] [新备注]\n\t存档备注可不填(不填则保持旧的存档备注不变)");
         
         addcom("del", "d", IdDel(None), "删除指定存档\t",
-            "删除存档\n\t命令参数用法: del/d [编号]");
+            "删除存档\n\t命令参数用法:\n\t1. del/d [编号]\n\t2. 批量删除(用减号表示范围，用空格或逗号分隔)例子:
+            del 1-3 5 6 8-9\n\t    del 1-3,5,6,8-9\n\t    del 1-3 5,6,8-9");
         addcom("qdel", "qd", IdQdel, "删除最新存档\n",
             "删除最新的一次存档");
 
@@ -181,8 +182,44 @@ impl Analyzer {
                 *opt = None;
                 return Ok(());
             }
-            let index = parts[1].parse::<usize>().with_msg("命令格式错误")?;
-            *opt = Some(Del::new(index - 1));
+            let mut indexs:Vec<usize> = Vec::new();
+            let mut i = 0 as usize;
+            let mut start = None;
+            
+            for &iter in parts.iter().skip(1) {
+                let mut push_range = |mut in_i, in_start| {
+                            in_i = std::cmp::max(in_i as i32 -1, 0) as usize;
+                            if let Some(mut s) = in_start {
+                                s = std::cmp::max(s as i32 -1, 0) as usize;
+                                indexs.extend(s..=in_i);
+                                //println!("s:{s}");
+                            } else {
+                                indexs.push(in_i);
+                            }
+                        };
+                for c in iter.chars() {
+                    let trans = c as usize;
+                    match trans {
+                        48..=57 => i = i*10+(trans-48),     //0-9
+                        44 => {                             //,
+                            push_range(i, start);
+                            start = None;
+                            i = 0;
+                        }
+                        45 => {                             //-
+                            start = Some(i);
+                            i = 0;
+                        }
+                        _ => {}
+                    }
+                }
+                if i != 0 {
+                    push_range(i, start);
+                    start = None;
+                    i = 0;
+                }
+            }
+            *opt = Some(Del::new_vec(indexs));
             Ok(())
         };
 

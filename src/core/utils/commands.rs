@@ -43,7 +43,7 @@ pub struct Load {
 
 #[derive(Clone, Debug)]
 pub struct Del {
-    pub index: usize,
+    pub indexs: Vec<usize>,
 }
 
 #[derive(Clone, Debug)]
@@ -76,8 +76,11 @@ impl Load {
 }
 
 impl Del {
-    pub fn new(index: usize) -> Self {
-        Self { index }
+    pub fn new_slices(indexs: &[usize]) -> Self {
+        Self { indexs: Vec::from(indexs) }
+    }
+    pub fn new_vec(indexs: Vec<usize>) -> Self {
+        Self { indexs }
     }
 }
 

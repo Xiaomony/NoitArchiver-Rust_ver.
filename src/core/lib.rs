@@ -32,6 +32,7 @@ impl<'a, T: IOManager> Manager<'a, T> {
     (游戏进行中存档的话保存的是Noita的自动存档,可能是几分钟前的存档,并非保存时的存档)
     6.游戏进行中请勿读取存档
     7.随着游戏的进行,每次存档所用的时间和占用的空间也会不断增大,请耐心等待
+    8.本程序的命令行版本支持 传入命令行参数
 
 命令说明：
     1.使用  help+命令  的形式查看某条命令的说明及用法
@@ -415,42 +416,57 @@ impl<'a, T: IOManager> Manager<'a, T> {
         Ok(())
     }
 
-    fn del(&mut self, opt: Option<Del>) -> Result<(), Error> {
-        let para;
+    fn del(&mut self,opt: Option<Del>) -> Result<(), Error> {
+        let mut paras;
+        let mut comfirm = false;
         match opt {
-            Some(_) => para = opt.unwrap(),
+            Some(_) => paras = opt.unwrap(),
             None => {
                 out!(self.logger, "请输入存档编号(直接换行则取消删除):");
                 if let Some(index) = self.logger.io_getint(){
-                    para = Del::new((index - 1) as usize);
+                    paras = Del::new_slices(&[(index - 1) as usize]);
                 } else {
                     outln_log!(self.logger, "取消删除");
                     return Ok(());
                 }
+                comfirm = true;
             }
         };
-        
-        if para.index >= self.file_manager.get_archive_infolen() {
-            outln_warn!(self.logger, "存档编号{}不存在", para.index);
-            return Ok(());
+        paras.indexs.sort_by(|a, b| b.cmp(a));
+        paras.indexs.dedup();
+        if !comfirm {
+            out_warn!(self.logger, "此操作会删除存档 \"{:?}\" 请确认(y/n):",paras.indexs);
+            if !self.logger.io_comfirm() {
+                outln_log!(self.logger, "取消删除");
+                return Ok(());
+            }
         }
-        if self.file_manager.get_archive_infos()[para.index].get_is_favored() {
-            outln_warn!(self.logger, "存档被收藏,无法修改");
-            return Ok(());
+        for index in paras.indexs {
+            if index >= self.file_manager.get_archive_infolen() {
+                outln_warn!(self.logger, "存档编号{}不存在", index);
+                return Ok(());
+            }
+            if self.file_manager.get_archive_infos()[index].get_is_favored() {
+                outln_warn!(self.logger, "存档[{}]被收藏,无法操作", index);
+                return Ok(());
+            }
+    
+            if comfirm {    
+                out_warn!(self.logger, "此操作会删除存档 \"{}\" 请确认(y/n):",
+                    self.file_manager.get_archive_infos()[index].to_string());
+                if !self.logger.io_comfirm() {
+                    outln_log!(self.logger, "取消删除");
+                    return Ok(());
+                }
+            }
+
+            let del_info = self.file_manager.get_archive_infos()[index].to_string();
+            self.file_manager
+                .del(index)
+                .with_moreinfo("删除存档失败")?;
+    
+            outln_suc!(self.logger, "成功删除存档({}) \"{}\"", index + 1, del_info);
         }
-
-        out_warn!(self.logger, "此操作会删除存档 \"{}\" 请确认(y/n):",
-            self.file_manager.get_archive_infos()[para.index].to_string());
-        if !self.logger.io_comfirm() {
-            outln_log!(self.logger, "取消删除");
-            return Ok(());
-        }
-
-        self.file_manager
-            .del(para.index)
-            .with_moreinfo("删除存档失败")?;
-
-        outln_suc!(self.logger, "删除成功");
         Ok(())
     }
 

@@ -29,6 +29,17 @@ fn main() {
         }
     }
 
+    let args:Vec<String> = std::env::args().collect();
+    if args.len() > 1 {
+        let combined_args:Vec<String> = args.into_iter().skip(1).collect();
+        let combined_str = combined_args.join(" ");
+        if let Err(e) = manager.run_command(&combined_str) {
+            outln_err!(logger, "{}", e);
+            puase();
+        }
+        return;
+    }
+
     if let Err(msg) = manager.run_command("cls") {
         outln_warn!(logger, "初始化错误\n\t{}", msg);
         puase();
