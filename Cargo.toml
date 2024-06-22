@@ -1,6 +1,6 @@
 [package]
 name = "NoitArchiver"
-version = "2.2.0"
+version = "2.2.1"
 authors = ["runner"]
 edition = "2021"
 build = "build.rs"
