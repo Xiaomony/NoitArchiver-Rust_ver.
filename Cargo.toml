@@ -2,7 +2,7 @@
 members = [
     "Core",
     "App_cmd",
-    # "App_gui",
+    "App_gui",
 ]
 
 

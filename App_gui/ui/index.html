@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>NoitArchiver GUI</title>
+
+        <link rel="stylesheet" href="style.css"/>
+        <script src="main.js"></script>
+    </head>
+    
+    <body>
+        <div class="row-full">
+
+            <div class="container" id="command-buttons">
+
+                <div class="row">
+                    <button type="button" class="button command" id="bt_cls">cls</button>
+                    <button type="button" class="button command" id="bt_help">help</button>
+                </div>
+                
+                <div class="container" id="command-sets">
+                    <div class="row">
+                        <h3>操作分类</h3>
+                    </div>
+                    <script src="./tab.js"></script>
+
+                    <div class="row">
+                        <div class="row tabs">
+                            <button class="button command tablinks" onclick="openTab(event, 'saves')">保存类</button>
+                            <button class="button command tablinks" onclick="openTab(event, 'loads')">加载类</button>
+                            <button class="button command tablinks" onclick="openTab(event, 'dels')">删除类</button>
+                            <button class="button command tablinks" onclick="openTab(event, 'favors')">收藏类</button>
+                        </div>
+                    </div>
+
+                    <div class="container" id="per-set-container">
+                        
+                        <div id="saves" class="tabcontent">
+                            <div class="row">
+                                <button type="button" class="button command" id="bt_save">save</button>
+                                <button type="button" class="button command" id="bt_qsave">qsave</button>
+                                <button type="button" class="button command" id="bt_rsave">rsave</button>
+                            </div>
+                        </div>
+                        <div id="loads" class="tabcontent">
+                            <div class="row">
+                                <button type="button" class="button command" id="bt_load">load</button>
+                                <button type="button" class="button command" id="bt_qload">qload</button>
+                            </div>
+                        </div>
+                        <div id="dels" class="tabcontent">
+                            <div class="row">
+                                <button type="button" class="button command" id="bt_del">del</button>
+                                <button type="button" class="button command" id="bt_qdel">qdel</button>
+                            </div>
+                        </div>
+                        <div id="favors" class="tabcontent">
+                            <div class="row">
+                                <button type="button" class="button command" id="bt_favor">favor</button>
+                                <button type="button" class="button command" id="bt_unfavor">unfavor</button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <button type="button" class="button command" id="bt_ma">ma</button>
+                    <button type="button" class="button command" id="bt_usage">usage</button>
+                </div>
+            </div>
+
+            <div class="container" id="logs-container">
+                <div class="container" id="ArchiveInfos">
+                    Infos
+                </div>
+
+                <div class="container" id="OutputLogs">
+                    Logs<br/>Logs<br/>Logs<br/>Logs<br/>Logs<br/>Logs<br/>Logs<br/>Logs<br/>Logs<br/>Logs<br/>Logs<br/>Logs<br/>Logs<br/>Logs<br/>
+                </div>
+            </div>
+
+        </dev>
+    </body>
+</html>

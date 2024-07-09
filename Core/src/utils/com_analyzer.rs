@@ -1,8 +1,11 @@
 // use regex::Regex;
 
+use serde::Serialize;
+
 use super::commands::{CommandID::*, *};
 use super::io_manager::{Error, ResultExt};
 
+#[derive(Serialize)]
 pub struct ComMap {
     pub full_name: String,
     pub short_name: String,
@@ -26,7 +29,7 @@ pub struct Analyzer {
     command_list: Vec<ComMap>,
 }
 impl Analyzer {
-    pub fn new() -> Self {
+    pub fn generate_comlist() -> Vec<ComMap> {
         let mut comlist: Vec<ComMap> = Vec::new();
         let mut addcom = |full_name, short_name, id, breif_info, detail| {
             comlist.push(ComMap::new(full_name, short_name, id, breif_info, detail));
@@ -70,7 +73,10 @@ impl Analyzer {
         
         addcom("usage", "use", IdUsage, "查看占用空间\n",
             "查看占用空间");
-
+        comlist
+    }
+    pub fn new() -> Self {
+        let comlist: Vec<ComMap> = Self::generate_comlist();
         Self {
             command_list: comlist,
         }

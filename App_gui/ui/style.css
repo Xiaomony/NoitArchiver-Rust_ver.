@@ -1,0 +1,156 @@
+body {
+    display: flex;
+    
+    justify-content: center;
+    margin-top: 40px;
+    margin-left: 50px;
+    margin-right: 20px;
+    /* border: 5px solid red; */
+}
+
+:root {
+    font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
+    font-size: 16px;
+    line-height: 24px;
+    font-weight: 400;
+
+    color: #0f0f0f;
+    background-color: #f6f6f6;
+}
+
+.row-full {
+    display: flex;
+    width: 100%;
+    /* border: 5px solid red; */
+    height: 600px;
+}
+
+.row {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.container {
+    border: 3px solid;
+    border-radius: 10px;
+    padding: 20px;
+}
+
+.button.command {
+    border-radius: 8px;
+    border: 1px solid transparent;
+    font-size: 0.9em;
+    
+    font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
+    
+    transition: border-color 0.25s;
+    transition: background-color 0.25s;
+
+    width: 120px;
+    height: 40px;
+
+    cursor: pointer;
+}
+
+#bt_save, #bt_qsave, #bt_rsave {
+    width: 90px;
+    height: 40px;
+}
+
+.button.command.tablinks {
+    font-size: 1em;
+    width: 80px;
+    height: 40px;
+}
+
+.tabcontent {
+    display: none;
+}
+
+#command-buttons {
+    flex: 0 0 40%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 10%;
+}
+
+#command-sets {
+    border: none;
+}
+
+#logs-container {
+    flex: 0 0 50%;
+    margin-left: auto;
+    border: none;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5%;
+}
+
+#ArchiveInfos {
+    flex: 0 0 43%;
+}
+#OutputLogs {
+    flex: 0 0 43%;
+    overflow: auto;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        color: #f6f6f6;
+        background-color: #2f2f2f;
+    }
+
+    .container {
+        border-color: rgb(151, 148, 148);
+    }
+
+    .button.command {
+        color: #ffffff;
+        background-color: #0f0f0f98;
+    }
+    .button.command:hover {
+        border: 2px solid #396cd8;
+        filter: drop-shadow(3px 3px 4px #78787c);
+    }
+    .button.command:active {
+        background-color: #cfcfcf69;
+    }
+
+    .row.tabs button.active {
+        border: 2px solid #396cd8;
+        background-color: #435a8d;
+    }
+}
+
+@media (prefers-color-scheme: light) {
+    :root {
+        color: #2f2f2f; /* 深色文字 */
+        background-color: #f6f6f6; /* 浅色背景 */
+    }
+
+    .container {
+        border-color: rgb(105, 105, 105); /* 边框颜色 */
+    }
+
+    .button.command {
+        color: #2f2f2f; /* 深色文字 */
+        background-color: #e0e0e0; /* 浅灰色背景 */
+    }
+    .button.command:hover {
+        border: 2px solid #ff8c00; /* 橙色边框 */
+        filter: drop-shadow(3px 3px 4px #b0b0b0); /* 浅灰色阴影 */
+    }
+    .button.command:active {
+        background-color: #ffa500; /* 激活时橙色背景 */
+    }
+
+    .row.tabs button.active {
+        border: 2px solid #ff8c00; /* 橙色边框 */
+        background-color: #ffa500; /* 激活时橙色背景 */
+    }
+}

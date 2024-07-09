@@ -1,6 +1,8 @@
 //use super::io_manager::Error;
 
-#[derive(Debug, Clone)]
+use serde::Serialize;
+
+#[derive(Debug, Clone, Serialize)]
 pub enum CommandID {
     IdClear,
     IdHelp(Option<(String, String, String)>),
@@ -24,29 +26,29 @@ pub enum CommandID {
     IdUsage,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize)]
 pub struct Save {
     pub arch_name: String,
     pub arch_note: String,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize)]
 pub struct Modify {
     pub index: usize,
     pub info: Save,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize)]
 pub struct Load {
     pub index: usize,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize)]
 pub struct Del {
     pub indexs: Vec<usize>,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize)]
 pub struct Favor {
     pub index: usize,
 }
