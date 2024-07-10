@@ -4,23 +4,23 @@ use std::fmt::Arguments;
 pub struct IOGui {}
 
 impl IOManager for IOGui {
-    fn io_print(&self, args: Arguments) {
+    fn io_print(&self, _args: Arguments) {
         todo!()
     }
 
-    fn io_print_err(&self, args: Arguments) {
+    fn io_print_err(&self, _args: Arguments) {
         todo!()
     }
 
     fn io_print_warn(&self, args: Arguments) {
-        todo!()
+        println!("{}", format!("{}", args));
     }
 
     fn io_print_log(&self, args: Arguments) {
-        todo!()
+        println!("{}", format!("{}", args));
     }
 
-    fn io_print_suc(&self, args: Arguments) {
+    fn io_print_suc(&self, _args: Arguments) {
         todo!()
     }
 

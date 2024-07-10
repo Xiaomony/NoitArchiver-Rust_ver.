@@ -10,7 +10,7 @@ use std::ops::RangeInclusive;
 
 pub struct Manager<'a, T: IOManager> {
     com_analyzer: com_analyzer::Analyzer,
-    file_manager: file_manager::FileManager<'a, T>,
+    pub file_manager: file_manager::FileManager<'a, T>,
     logger: &'a T,
     is_running: bool,
 }

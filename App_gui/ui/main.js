@@ -4,7 +4,7 @@ function loadComList() {
         const { invoke } = window.__TAURI__.tauri;
         invoke("get_comlist").then( (comlist) => displayComInfos(comlist) )
     } catch (error) {
-        console.error("加载命令信息失败", error);
+        alert("加载命令信息失败", error);
     }
 }
 
@@ -30,4 +30,22 @@ function displayComInfos(comlist) {
     window.bt_usage.innerHTML = comlist[15].breif_info;
 }
 
+function loadArchiveInfo() {
+    try {
+        const { invoke } = window.__TAURI__.tauri;
+        invoke("get_archinfos").then( (infos) => {
+            window.ArchiveInfos.innerHTML = "";
+            infos.forEach(item => {
+                console.log('Item:', item);
+                let formattedString = `<pre>${item.date.join('-')} ${item.time.join(':')}\t${item.name}\t\t${item.note}\n</pre>`;
+                window.ArchiveInfos.innerHTML += formattedString;
+            });
+        })
+
+    } catch (error) {
+        console.error("加载存档信息失败" , error);
+    }
+}
+
 addEventListener("DOMContentLoaded", () => { loadComList() });
+addEventListener("DOMContentLoaded", () => { loadArchiveInfo() });

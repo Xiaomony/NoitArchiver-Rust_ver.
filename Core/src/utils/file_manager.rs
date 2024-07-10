@@ -13,7 +13,7 @@ use std::io::BufReader;
 //use std::io::BufWriter;
 use std::path::{Path, PathBuf};
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct ArchiveInfo {
     pub name: String,
     pub note: String,
