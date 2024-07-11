@@ -7,6 +7,10 @@
 
         <link rel="stylesheet" href="style.css"/>
         <script src="main.js"></script>
+
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@200..900&display=swap" rel="stylesheet">
     </head>
     
     <body>
@@ -15,8 +19,8 @@
             <div class="container" id="command-buttons">
 
                 <div class="row">
-                    <button type="button" class="button command" id="bt_cls">cls</button>
-                    <button type="button" class="button command" id="bt_help">help</button>
+                    <button type="button" class="button command" id="bt_cls" onclick="opr_cls()">cls</button>
+                    <button type="button" class="button command" id="bt_help" onclick="opr_help()">help</button>
                 </div>
                 
                 <div class="container" id="command-sets">
@@ -73,14 +77,37 @@
 
             <div class="container" id="logs-container">
                 <div class="container" id="ArchiveInfos">
-                    Infos
+                    <thead>
+                        <tr>
+                            <th><input type="checkbox" name="select"/></th>
+                            <th>日期</th>
+                            <th>时间</th>
+                            <th>存档名</th>
+                            <th>备注</th>
+                        </tr>
+                    </thead>
                 </div>
 
                 <div class="container" id="OutputLogs">
-                    Logs<br/>Logs<br/>Logs<br/>Logs<br/>Logs<br/>Logs<br/>Logs<br/>Logs<br/>Logs<br/>Logs<br/>Logs<br/>Logs<br/>Logs<br/>Logs<br/>
+                    <div class="output common">
+                    </div>
                 </div>
-            </div>
 
+            </div>
         </dev>
+        <div class="modalbox" id="help_page">
+            <pre id="helpage_content"></pre>
+            <button class="button command bt_modalbox_comfirm">Ok</button>
+
+            <button class="button command" id="bt_github_link" onclick="jumpTo('https://github.com/Xiaomony/NoitArchiver-Rust_ver.')">
+                GitHub主页
+            </button>
+            <button class="button command" id="bt_bilibili_link" onclick="">
+                Bilibile说明视频
+            </button>
+            <button class="button command" id="bt_github_link" onclick="jumpTo('https://github.com/Xiaomony/NoitaArchiveManager')">
+                旧版GitHub主页
+            </button>
+        </div>
     </body>
 </html>

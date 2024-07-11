@@ -21,7 +21,6 @@ body {
 .row-full {
     display: flex;
     width: 100%;
-    /* border: 5px solid red; */
     height: 600px;
 }
 
@@ -93,10 +92,50 @@ body {
 
 #ArchiveInfos {
     flex: 0 0 43%;
+    overflow: auto;
+    padding: 5px;
 }
 #OutputLogs {
-    flex: 0 0 43%;
+    flex: 0 0 55%;
     overflow: auto;
+    padding: 5px;
+}
+
+.output {
+    font-size: 1em;
+    font-family: "Noto Serif SC", serif;
+    font-optical-sizing: auto;
+    font-weight: weight;
+    font-style: normal;
+}
+
+.modalbox {
+    margin-top: 0;
+    display: none;
+    position: fixed;
+    
+    left: 10%;
+    top: 5%;
+    width: 80%;
+    height: 90%;
+    overflow-y: auto;
+    word-wrap: break-word;
+    border: 5px solid transparent;
+    border-radius: 10px;
+}
+
+.modalbox pre {
+    padding-top: 0;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-size: 1em;
+    font-family: "Noto Serif SC", serif;
+    font-weight: weight;
+    font-style: normal;
+}
+
+.button.command.bt_modalbox_comfirm {
+    float: right;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -125,12 +164,45 @@ body {
         border: 2px solid #396cd8;
         background-color: #435a8d;
     }
+    .output.common {
+        color: #e0e0e0;
+    }
+    .output.err {
+        color: rgb(228, 109, 119);
+    }
+    .output.warn {
+        color: #e2db74;
+    }
+    .output.log {
+        color: #2bd3fd;
+    }
+    .output.suc {
+        color: #43da7d;
+    }
+    /*--------------------------------------------------------------*/
+    .modalbox {
+        background-color: #565e75;
+        filter: drop-shadow(0 0 4px #bebebe);
+    }
+    .modalbox pre {
+        color: #dff2f5;
+    }
+    
+    a:link, :visited {
+        color: #6d9bff;
+    }
+    a:hover {
+        color: rgb(9, 218, 200);
+    }
+    a:active {
+        color: rgb(180, 235, 230);
+    }
 }
 
 @media (prefers-color-scheme: light) {
     :root {
         color: #2f2f2f; /* 深色文字 */
-        background-color: #f6f6f6; /* 浅色背景 */
+        background-color: #e0ded4; /* 浅色背景 */
     }
 
     .container {
@@ -139,7 +211,7 @@ body {
 
     .button.command {
         color: #2f2f2f; /* 深色文字 */
-        background-color: #e0e0e0; /* 浅灰色背景 */
+        background-color: #cccccc; /* 浅灰色背景 */
     }
     .button.command:hover {
         border: 2px solid #ff8c00; /* 橙色边框 */
@@ -152,5 +224,23 @@ body {
     .row.tabs button.active {
         border: 2px solid #ff8c00; /* 橙色边框 */
         background-color: #ffa500; /* 激活时橙色背景 */
+    }
+    .output {
+        font-weight: 700;
+    }
+    .output.common {
+        color: #333333; /* 深灰色，确保在浅色背景下可读 */
+    }
+    .output.err {
+        color: rgb(186, 33, 40); /* 深红色，突显错误信息 */
+    }
+    .output.warn {
+        color: #ca9800; /* 金色，突显警告信息 */
+    }
+    .output.log {
+        color: #18abeb; /* 深蓝色，确保信息日志可读 */
+    }
+    .output.suc {
+        color: #00a000; /* 深绿色，突显成功信息 */
     }
 }
