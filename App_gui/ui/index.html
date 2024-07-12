@@ -7,6 +7,7 @@
 
         <link rel="stylesheet" href="style.css"/>
         <script src="main.js"></script>
+        <script src="on_command.js"></script>
 
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,12 +18,12 @@
         <div class="row-full">
 
             <div class="container" id="command-buttons">
-
+        <!--############################cls、help命令############################-->
                 <div class="row">
                     <button type="button" class="button command" id="bt_cls" onclick="opr_cls()">cls</button>
                     <button type="button" class="button command" id="bt_help" onclick="opr_help()">help</button>
                 </div>
-                
+        <!--############################命令集############################-->
                 <div class="container" id="command-sets">
                     <div class="row">
                         <h3>操作分类</h3>
@@ -68,26 +69,32 @@
 
                     </div>
                 </div>
-                
+        <!--############################ma、usage命令############################-->
                 <div class="row">
-                    <button type="button" class="button command" id="bt_ma">ma</button>
-                    <button type="button" class="button command" id="bt_usage">usage</button>
+                    <button type="button" class="button command" id="bt_ma" onclick="on_modArch">ma</button>
+                    <button type="button" class="button command" id="bt_usage" onclick="on_usage">usage</button>
                 </div>
             </div>
 
             <div class="container" id="logs-container">
+        <!--############################存档信息############################-->
                 <div class="container" id="ArchiveInfos">
-                    <thead>
-                        <tr>
-                            <th><input type="checkbox" name="select"/></th>
-                            <th>日期</th>
-                            <th>时间</th>
-                            <th>存档名</th>
-                            <th>备注</th>
-                        </tr>
-                    </thead>
-                </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th class="infotab_checkbox"><input type="checkbox" name="select"/></th>
+                                <th class="infotab_data">日期</th>
+                                <th class="infotab_time">时间</th>
+                                <th class="infotab_name">存档名</th>
+                                <th class="infotab_note">备注</th>
+                            </tr>
+                        </thead>
+                        <tbody id="Archinfo_tbody">
 
+                        </tbody>
+                    </table>
+                </div>
+        <!--############################日志输出############################-->
                 <div class="container" id="OutputLogs">
                     <div class="output common">
                     </div>
@@ -95,10 +102,8 @@
 
             </div>
         </dev>
+        <!--############################帮助页面弹出框############################-->
         <div class="modalbox" id="help_page">
-            <pre id="helpage_content"></pre>
-            <button class="button command bt_modalbox_comfirm">Ok</button>
-
             <button class="button command" id="bt_github_link" onclick="jumpTo('https://github.com/Xiaomony/NoitArchiver-Rust_ver.')">
                 GitHub主页
             </button>
@@ -108,6 +113,9 @@
             <button class="button command" id="bt_github_link" onclick="jumpTo('https://github.com/Xiaomony/NoitaArchiveManager')">
                 旧版GitHub主页
             </button>
+
+            <pre id="helpage_content"></pre>
+            <button class="button command bt_modalbox_comfirm">Ok</button>
         </div>
     </body>
 </html>

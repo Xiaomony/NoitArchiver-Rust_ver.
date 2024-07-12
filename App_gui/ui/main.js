@@ -40,16 +40,32 @@ function loadArchiveInfo() {
     try {
         const { invoke } = window.__TAURI__.tauri;
         invoke("get_archinfos").then( (infos) => {
-            window.ArchiveInfos.innerHTML = "";
             infos.forEach(item => {
-                let formattedString = `<pre>${item.date.join('-')} ${item.time.join(':')}\t${item.name}\t\t${item.note}\n</pre>`;
-                window.ArchiveInfos.innerHTML += formattedString;
+                add_archinfo(item);
             });
         })
 
     } catch (error) {
         console.error("加载存档信息失败" , error);
     }
+}
+
+function add_archinfo(item) {
+    console.log(item);
+    var favored_str = "";
+    if (item.is_favored) {
+        favored_str = " favored";
+    }
+    var info_str = "";
+    var formatted_time = item.time.map(unit => unit.toString().padStart(2, '0')).join(':');
+    info_str += "<tr>";
+    info_str += "<td class='infotab_checkbox'><input type='checkbox' name='select'/></td>";
+    info_str += `<td class="infotab_data${favored_str}">${item.date.join('-')}</td>`;
+    info_str += `<td class="infotab_time${favored_str}">${formatted_time}</td>`;
+    info_str += `<td class="infotab_name${favored_str}">${item.name}</td>`;
+    info_str += `<td class="infotab_note${favored_str}">${item.note}</td>`;
+    info_str += "</tr>";
+    window.Archinfo_tbody.innerHTML += info_str;
 }
 
 function init_helpage() {
@@ -109,12 +125,6 @@ function doc_loaded() {
     loadComList();
     loadArchiveInfo();
     init_helpage();
-
-    opr_addlog_common("common");
-    opr_addlog_err("error");
-    opr_addlog_warn("warn");
-    opr_addlog_log("log");
-    opr_addlog_suc("success");
 }
 
 addEventListener("DOMContentLoaded", () => { doc_loaded() });

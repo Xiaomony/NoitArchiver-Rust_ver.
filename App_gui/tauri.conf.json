@@ -58,10 +58,10 @@
     "windows": [
       {
         "fullscreen": false,
-        "height": 700,
+        "height": 900,
         "resizable": true,
         "title": "NoitArchiver GUI",
-        "width": 1000
+        "width": 1200
       }
     ]
   }
