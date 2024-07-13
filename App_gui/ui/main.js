@@ -51,7 +51,6 @@ function loadArchiveInfo() {
 }
 
 function add_archinfo(item) {
-    console.log(item);
     var favored_str = "";
     if (item.is_favored) {
         favored_str = " favored";
@@ -102,29 +101,50 @@ function opr_help() {
 
 function opr_addlog_common(log) {
     formattedString = "<div class='output common'>"+log+"</div>";
-    window.OutputLogs.innerHTML += formattedString;
+    const log_container = document.getElementById("OutputLogs");
+    log_container.innerHTML += formattedString;
+    log_container.scrollTop = log_container.scrollHeight;
 }
 function opr_addlog_err(log) {
     formattedString = "<div class='output err'>"+log+"</div>";
-    window.OutputLogs.innerHTML += formattedString;
+    const log_container = document.getElementById("OutputLogs");
+    log_container.innerHTML += formattedString;
+    log_container.scrollTop = log_container.scrollHeight;
 }
 function opr_addlog_warn(log) {
     formattedString = "<div class='output warn'>"+log+"</div>";
-    window.OutputLogs.innerHTML += formattedString;
+    const log_container = document.getElementById("OutputLogs");
+    log_container.innerHTML += formattedString;
+    log_container.scrollTop = log_container.scrollHeight;
 }
 function opr_addlog_log(log) {
     formattedString = "<div class='output log'>"+log+"</div>";
-    window.OutputLogs.innerHTML += formattedString;
+    const log_container = document.getElementById("OutputLogs");
+    log_container.innerHTML += formattedString;
+    log_container.scrollTop = log_container.scrollHeight;
 }
 function opr_addlog_suc(log) {
     formattedString = "<div class='output suc'>"+log+"</div>";
-    window.OutputLogs.innerHTML += formattedString;
+    const log_container = document.getElementById("OutputLogs");
+    log_container.innerHTML += formattedString;
+    log_container.scrollTop = log_container.scrollHeight;
 }
 
 function doc_loaded() {
     loadComList();
     loadArchiveInfo();
     init_helpage();
+    add_listen();
 }
 
 addEventListener("DOMContentLoaded", () => { doc_loaded() });
+
+
+function add_listen() {
+    const event = window.__TAURI__.event;
+    event.listen("out_common", (event) => { opr_addlog_common(event.payload); })
+    event.listen("out_err", (event) => { opr_addlog_err(event.payload); })
+    event.listen("out_warn", (event) => { opr_addlog_warn(event.payload); })
+    event.listen("out_log", (event) => { opr_addlog_log(event.payload); })
+    event.listen("out_suc", (event) => { opr_addlog_suc(event.payload); })
+}
