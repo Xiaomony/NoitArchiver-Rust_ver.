@@ -130,8 +130,14 @@ function opr_addlog_suc(log) {
 }
 function opr_get_confirm(msg) {
     console.log("opr_get_confirm");
+    window.confirm_msg.innerHTML = msg;
+    window.confirm_box.style.display = "block";
+}
+
+function confirm(tf) {
     const event = window.__TAURI__.event;
-    event.emit("confirm", true);
+    event.emit("confirm", tf);
+    window.confirm_box.style.display = "none";
 }
 
 function doc_loaded() {

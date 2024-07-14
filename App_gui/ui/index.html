@@ -120,6 +120,12 @@
             <button class="button command bt_modalbox_comfirm">Ok</button>
         </div>
         <!--############################各种命令的弹出框############################-->
+        <!--############################confirm弹出框############################-->
+        <div class="modalbox getinfo" id="confirm_box">
+            <p id="confirm_msg"></p>
+            <button class="button command cancel" onclick="confirm(false)">取消</button>
+            <button class="button command ok" onclick="confirm(true)">确定</button>
+        </div>
         <!--############################save############################-->
         <div class="modalbox getinfo" id="get_save_info">
             <input class="input_getinfo" id="in_save_name" placeholder="存档名"/>
