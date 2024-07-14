@@ -205,8 +205,8 @@ impl<'a, T: IOManager> Manager<'a, T> {
             return Ok(());
         }
 
-        out_warn!(self.logger, "此操作会覆盖存档 \"{}\" 请确认(y/n):", infos[last].to_string());
-        if !self.logger.io_comfirm() {
+        //out_warn!(self.logger, "此操作会覆盖存档 \"{}\" 请确认", infos[last].to_string());
+        if !get_confirm!(self.logger, "此操作会覆盖存档 \"{}\" 请确认", infos[last].to_string()) {
             outln_log!(self.logger, "取消存档");
             return Ok(());
         }
@@ -252,9 +252,9 @@ impl<'a, T: IOManager> Manager<'a, T> {
             return Ok(());
         }
         
-        out_warn!(self.logger, "此操作会用存档 \"{}\" 覆盖现有存档,请确认(y/n):",
-            self.file_manager.get_archive_infos()[para.index].to_string());
-        if !self.logger.io_comfirm() {
+        //out_warn!(self.logger,);
+        if !get_confirm!(self.logger,  "此操作会用存档 \"{}\" 覆盖现有存档,请确认",
+            self.file_manager.get_archive_infos()[para.index].to_string()) {
             outln_log!(self.logger, "取消读档");
             return Ok(());
         }
@@ -275,9 +275,9 @@ impl<'a, T: IOManager> Manager<'a, T> {
         }
         last -= 1;
 
-        out_warn!(self.logger, "此操作会用存档 \"{}\" 覆盖现有存档,请确认(y/n):",
-            self.file_manager.get_archive_infos()[last].to_string());
-        if !self.logger.io_comfirm() {
+        //out_warn!(self.logger, );
+        if !get_confirm!(self.logger, "此操作会用存档 \"{}\" 覆盖现有存档,请确认",
+            self.file_manager.get_archive_infos()[last].to_string()) {
             outln_log!(self.logger, "取消读档");
             return Ok(());
         }
@@ -405,8 +405,8 @@ impl<'a, T: IOManager> Manager<'a, T> {
         paras.indexs.dedup();
         if !comfirm {
             let index_add1:Vec<usize> = paras.indexs.iter().map(|x| x+1).collect();
-            out_warn!(self.logger, "此操作会删除存档 \"{:?}\" 请确认(y/n):",index_add1);
-            if !self.logger.io_comfirm() {
+            //out_warn!(self.logger, "此操作会删除存档 \"{:?}\" 请确认",index_add1);
+            if !get_confirm!(self.logger, "此操作会删除存档 \"{:?}\" 请确认",index_add1) {
                 outln_log!(self.logger, "取消删除");
                 return Ok(());
             }
@@ -422,9 +422,9 @@ impl<'a, T: IOManager> Manager<'a, T> {
             }
     
             if comfirm {    
-                out_warn!(self.logger, "此操作会删除存档 \"{}\" 请确认(y/n):",
-                    self.file_manager.get_archive_infos()[index].to_string());
-                if !self.logger.io_comfirm() {
+                //out_warn!(self.logger,);
+                if !get_confirm!(self.logger, "此操作会删除存档 \"{}\" 请确认",
+                        self.file_manager.get_archive_infos()[index].to_string()) {
                     outln_log!(self.logger, "取消删除");
                     return Ok(());
                 }
@@ -452,9 +452,9 @@ impl<'a, T: IOManager> Manager<'a, T> {
             outln_warn!(self.logger, "存档被收藏,无法修改");
             return Ok(());
         }
-        out_warn!(self.logger, "此操作会用删除存档 \"{}\" 请确认(y/n):",
-            self.file_manager.get_archive_infos()[last].to_string());
-        if !self.logger.io_comfirm() {
+        //out_warn!(self.logger,);
+        if !get_confirm!(self.logger, "此操作会用删除存档 \"{}\" 请确认",
+                self.file_manager.get_archive_infos()[last].to_string()) {
             outln_log!(self.logger, "取消删除");
             return Ok(());
         }

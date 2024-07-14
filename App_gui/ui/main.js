@@ -40,11 +40,11 @@ function loadArchiveInfo() {
     try {
         const { invoke } = window.__TAURI__.tauri;
         invoke("get_archinfos").then( (infos) => {
+            window.Archinfo_tbody.innerHTML = "";
             infos.forEach(item => {
                 add_archinfo(item);
             });
         })
-
     } catch (error) {
         console.error("加载存档信息失败" , error);
     }
@@ -58,7 +58,7 @@ function add_archinfo(item) {
     var info_str = "";
     var formatted_time = item.time.map(unit => unit.toString().padStart(2, '0')).join(':');
     info_str += "<tr>";
-    info_str += "<td class='infotab_checkbox'><input type='checkbox' name='select'/></td>";
+    info_str += "<td class='infotab_checkbox'><input type='checkbox' class='info_checkbox' name='select'/></td>";
     info_str += `<td class="infotab_data${favored_str}">${item.date.join('-')}</td>`;
     info_str += `<td class="infotab_time${favored_str}">${formatted_time}</td>`;
     info_str += `<td class="infotab_name${favored_str}">${item.name}</td>`;
@@ -78,7 +78,6 @@ function init_helpage() {
             var helpage_content = document.getElementById("helpage_content");
             var bt_github_link = document.getElementById("bt_github_link");
             var bt_bilibili_link = document.getElementById("bt_bilibili_link");
-            console.log(window.help_page.style.display, event.target);
             var target=event.target;
             if (target != helpage && target != helpage_content && target != window.bt_help
                 && target != bt_github_link && target != bt_bilibili_link
@@ -129,12 +128,22 @@ function opr_addlog_suc(log) {
     log_container.innerHTML += formattedString;
     log_container.scrollTop = log_container.scrollHeight;
 }
+function opr_get_confirm(msg) {
+    console.log("opr_get_confirm");
+    const event = window.__TAURI__.event;
+    event.emit("confirm", true);
+}
 
 function doc_loaded() {
     loadComList();
     loadArchiveInfo();
     init_helpage();
     add_listen();
+
+    var bt_cancels = document.querySelectorAll(".button.command.cancel");
+    bt_cancels.forEach((item) => {
+        item.onclick = () => hide_infogetter();
+    })
 }
 
 addEventListener("DOMContentLoaded", () => { doc_loaded() });
@@ -142,9 +151,32 @@ addEventListener("DOMContentLoaded", () => { doc_loaded() });
 
 function add_listen() {
     const event = window.__TAURI__.event;
-    event.listen("out_common", (event) => { opr_addlog_common(event.payload); })
-    event.listen("out_err", (event) => { opr_addlog_err(event.payload); })
-    event.listen("out_warn", (event) => { opr_addlog_warn(event.payload); })
-    event.listen("out_log", (event) => { opr_addlog_log(event.payload); })
-    event.listen("out_suc", (event) => { opr_addlog_suc(event.payload); })
+    event.listen("out_common", (event) => { opr_addlog_common(event.payload); });
+    event.listen("out_err", (event) => { opr_addlog_err(event.payload); });
+    event.listen("out_warn", (event) => { opr_addlog_warn(event.payload); });
+    event.listen("out_log", (event) => { opr_addlog_log(event.payload); });
+    event.listen("out_suc", (event) => { opr_addlog_suc(event.payload); });
+    event.listen("get_confirm", (event) => { opr_get_confirm(event.payload); });
+
+    event.listen("fresh_arch", (event) => { refresh_arch_container(); });
+}
+
+function refresh_arch_container() {
+    loadArchiveInfo();
+    const arch_container = document.getElementById("ArchiveInfos");
+    arch_container.scrollTop = arch_container.scrollHeight;
+}
+
+function hide_infogetter() {
+    var list = document.querySelectorAll(".modalbox.getinfo");
+    list.forEach((item) => {
+        item.style.display = "none";
+    });
+}
+
+function change_all_checkbox() {
+    var list = document.getElementsByClassName("info_checkbox");
+    for (let i=0;i<list.length;i++) {
+        list[i].checked = window.all_checkbox.checked;
+    }
 }

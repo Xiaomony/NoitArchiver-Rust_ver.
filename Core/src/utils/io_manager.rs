@@ -66,6 +66,13 @@ macro_rules! outln_suc {
         $logger.io_print_suc(format_args!(concat!($format_str, "\n"), $($arg),*))
     };
 }
+// get confirm
+#[macro_export]
+macro_rules! get_confirm {
+    ($logger:expr,$format_str:expr $(, $arg:expr)*) => {
+        $logger.io_comfirm(format_args!($format_str, $($arg),*))
+    };
+}
 // -----------------------------------
 pub trait IOManager {
     fn io_print(&self, args: Arguments);
@@ -76,7 +83,7 @@ pub trait IOManager {
 
     fn io_getline(&self) -> String;
     fn io_getint(&self) -> Option<i32>;
-    fn io_comfirm(&self) -> bool;
+    fn io_comfirm(&self, args: Arguments) -> bool;
 
     fn io_cls(&self);
 }

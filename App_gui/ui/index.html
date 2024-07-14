@@ -43,27 +43,27 @@
                         
                         <div id="saves" class="tabcontent">
                             <div class="row">
-                                <button type="button" class="button command" id="bt_save">save</button>
-                                <button type="button" class="button command" id="bt_qsave">qsave</button>
-                                <button type="button" class="button command" id="bt_rsave">rsave</button>
+                                <button type="button" class="button command" id="bt_save" onclick="on_save()">save</button>
+                                <button type="button" class="button command" id="bt_qsave" onclick="on_qsave()">qsave</button>
+                                <button type="button" class="button command" id="bt_rsave" onclick="on_rsave()">rsave</button>
                             </div>
                         </div>
                         <div id="loads" class="tabcontent">
                             <div class="row">
-                                <button type="button" class="button command" id="bt_load">load</button>
-                                <button type="button" class="button command" id="bt_qload">qload</button>
+                                <button type="button" class="button command" id="bt_load" onclick="on_load()">load</button>
+                                <button type="button" class="button command" id="bt_qload" onclick="on_qload()">qload</button>
                             </div>
                         </div>
                         <div id="dels" class="tabcontent">
                             <div class="row">
-                                <button type="button" class="button command" id="bt_del">del</button>
-                                <button type="button" class="button command" id="bt_qdel">qdel</button>
+                                <button type="button" class="button command" id="bt_del" onclick="on_del()">del</button>
+                                <button type="button" class="button command" id="bt_qdel" onclick="on_qdel()">qdel</button>
                             </div>
                         </div>
                         <div id="favors" class="tabcontent">
                             <div class="row">
-                                <button type="button" class="button command" id="bt_favor">favor</button>
-                                <button type="button" class="button command" id="bt_unfavor">unfavor</button>
+                                <button type="button" class="button command" id="bt_favor" onclick="on_favor()">favor</button>
+                                <button type="button" class="button command" id="bt_unfavor" onclick="on_unfavor()">unfavor</button>
                             </div>
                         </div>
 
@@ -82,7 +82,9 @@
                     <table>
                         <thead>
                             <tr>
-                                <th class="infotab_checkbox"><input type="checkbox" name="select"/></th>
+                                <th class="infotab_checkbox">
+                                    <input type="checkbox" id="all_checkbox" name="select" onchange="change_all_checkbox()"/>
+                                </th>
                                 <th class="infotab_data">日期</th>
                                 <th class="infotab_time">时间</th>
                                 <th class="infotab_name">存档名</th>
@@ -117,5 +119,16 @@
             <pre id="helpage_content"></pre>
             <button class="button command bt_modalbox_comfirm">Ok</button>
         </div>
+        <!--############################各种命令的弹出框############################-->
+        <!--############################save############################-->
+        <div class="modalbox getinfo" id="get_save_info">
+            <input class="input_getinfo" id="in_save_name" placeholder="存档名"/>
+            <br/>
+            <input class="input_getinfo" id="in_save_note" placeholder="存档备注"/>
+            <br/>
+            <button class="button command cancel">取消</button>
+            <button class="button command ok" onclick="confirm_save()">确定</button>
+        </div>
+        <!--############################load############################-->
     </body>
 </html>

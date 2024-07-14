@@ -1,6 +1,7 @@
 use noitarchiver_core::utils::io_manager::*;
 use tauri::Manager;
 use std::fmt::Arguments;
+use std::sync::mpsc::{channel, Sender, Receiver};
 
 use crate::get_app_handle;
 
@@ -35,8 +36,20 @@ impl IOManager for IOGui {
         todo!()
     }
 
-    fn io_comfirm(&self) -> bool {
-        todo!()
+    fn io_comfirm(&self,  args: Arguments) -> bool {
+        get_app_handle().emit_all("get_confirm", format!("{}", args)).unwrap();
+        
+        let (tx, rx): (Sender<bool>, Receiver<bool>) = channel();
+        get_app_handle().once_global("confirm", move |event| {
+            if let Some(msg) = event.payload() {
+                if msg=="true" {
+                    tx.send(true).unwrap();
+                    return;
+                }
+            }
+            tx.send(false).unwrap();
+        });
+        rx.recv().unwrap()
     }
 
     fn io_cls(&self) {

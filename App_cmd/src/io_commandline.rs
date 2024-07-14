@@ -60,8 +60,9 @@ impl IOManager for IOCommandLine {
         }
     }
     
-    fn io_comfirm(&self) -> bool {
-        //self.io_print_warn(format_args!("{}(y/n)", msg));
+    fn io_comfirm(&self, args: Arguments) -> bool {
+        self.io_print_warn(format_args!("{}(y/n):", args));
+
         let mut input = String::new();
         io::stdin().read_line(&mut input)
             .expect("无法读取输入");

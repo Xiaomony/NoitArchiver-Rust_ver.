@@ -2,6 +2,7 @@ body {
     display: flex;
     
     justify-content: center;
+    align-items: center;
     margin-top: 40px;
     margin-left: 50px;
     margin-right: 20px;
@@ -105,6 +106,9 @@ th, td {
     justify-content: center;
     text-align: center;
 }
+.favored {
+    font-weight: 600;
+}
 .infotab_checkbox {
     padding: 0;
     width: 10px;
@@ -168,6 +172,29 @@ th, td {
     float: right;
 }
 
+.modalbox.getinfo {
+    left: 30%;
+    top: 35%;
+    width: 40%;
+    height: auto;
+    margin: 0;
+}
+.button.command.ok, .button.command.cancel {
+    float: right;
+    width: 80px;
+    height: 35px;
+}
+.input_getinfo {
+    width: 98%;
+    height: 36px;
+    margin: 3px 0;
+}
+input {
+    font-size: 1em;
+    border: 2px solid;
+    border-radius: 5px;
+}
+
 @media (prefers-color-scheme: dark) {
     :root {
         color: #f6f6f6;
@@ -229,6 +256,16 @@ th, td {
         color: #dff2f5;
     }
     
+    .button.command.ok {
+        border: 2px solid #396cd8;
+        background-color: #435a8d;
+    }
+
+    input {
+        color: #ffffff;
+        border-color: rgb(177, 177, 177);
+        background-color: rgb(62, 63, 65);
+    }
     /*--------------------------------------------------------------*/
     a:link, :visited {
         color: #6d9bff;
@@ -290,11 +327,11 @@ th, td {
         border: 2px solid rgb(182, 182, 187);
     }
     th {
-        background-color: #fcdcb7;
+        background-color: rgb(247, 188, 125);
     }
     .favored {
-        color: #94dcf1;
-        background-color: #5e5e5e;
+        color: #615f5d;
+        background-color: #fcdcb7;
     }
 
     .modalbox {
@@ -304,5 +341,15 @@ th, td {
     .modalbox pre {
         color: #0e0e0e;
         font-weight: 600;
+    }
+
+    .button.command.ok {
+        border: 2px solid #ff8c00;
+        background-color: #ffa500;
+    }
+    input {
+        color: #2f2f2f;
+        border-color: rgb(177, 177, 177);
+        background-color: rgb(252, 244, 233);
     }
 }
