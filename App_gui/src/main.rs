@@ -4,7 +4,7 @@
 use once_cell::sync::OnceCell;
 use tauri::Manager;
 use std::sync::Mutex;
-use std::thread;
+use std::{env, thread};
 
 extern crate noitarchiver_core;
 use noitarchiver_core::Manager as nManager;
@@ -35,7 +35,7 @@ fn get_archinfos() -> Vec<ArchiveInfo> {
 //#[tauri::command]
 fn run_command(command: &str) {
 	let mut manager = MANAGER.get().unwrap().lock().unwrap();
-	let cuted = &command[1..=command.len()-2];
+	let cuted = &(&command[1..=command.len()-2]).replace("\\\"", "\"");
 	println!("run command: {}",cuted);
 	manager.run_command(cuted).unwrap();
 }
@@ -43,6 +43,11 @@ fn run_command(command: &str) {
 #[tauri::command]
 fn get_help_str() -> String {
 	nManager::<IOGui>::HELP_MSG.to_string()
+}
+
+#[tauri::command]
+fn get_app_version() -> String {
+	env!("CARGO_PKG_VERSION").to_string()
 }
 
 fn main() {
@@ -59,7 +64,7 @@ fn main() {
 			});
 			Ok(())
 		})
-		.invoke_handler(tauri::generate_handler![get_comlist, get_archinfos, get_help_str])
+		.invoke_handler(tauri::generate_handler![get_comlist, get_archinfos, get_help_str, get_app_version])
 		.build(tauri::generate_context!())
 		.expect("error while build tauri application");
 

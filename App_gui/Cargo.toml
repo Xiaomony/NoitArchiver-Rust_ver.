@@ -1,11 +1,11 @@
 [package]
-name = "app"
-version = "0.1.0"
+name = "noitarchiver_gui"
+version = "3.0.0"
 description = "A Tauri App"
 authors = ["Xiaomony"]
 license = ""
 repository = ""
-default-run = "app"
+default-run = "noitarchiver_gui"
 edition = "2021"
 rust-version = "1.60"
 

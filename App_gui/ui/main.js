@@ -8,7 +8,7 @@ function jumpTo(link) {
 function loadComList() {
     try {
         const { invoke } = window.__TAURI__.tauri;
-        invoke("get_comlist").then( (comlist) => displayComInfos(comlist) )
+        invoke("get_comlist").then( (comlist) => displayComInfos(comlist) );
     } catch (error) {
         alert("加载命令信息失败", error);
     }
@@ -129,7 +129,6 @@ function opr_addlog_suc(log) {
     log_container.scrollTop = log_container.scrollHeight;
 }
 function opr_get_confirm(msg) {
-    console.log("opr_get_confirm");
     window.confirm_msg.innerHTML = msg;
     window.confirm_box.style.display = "block";
 }
@@ -150,6 +149,8 @@ function doc_loaded() {
     bt_cancels.forEach((item) => {
         item.onclick = () => hide_infogetter();
     })
+    const { invoke } = window.__TAURI__.tauri;
+    invoke("get_app_version").then( (version) => opr_addlog_suc("&nbsp;&nbsp;&nbsp;&nbsp;NoitArchiver 存档器 " + version) );
 }
 
 addEventListener("DOMContentLoaded", () => { doc_loaded() });
