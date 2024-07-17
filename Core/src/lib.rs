@@ -87,7 +87,7 @@ impl<'a, T: IOManager> Manager<'a, T> {
         match opt {
             None => {
                 outln_log!(self.logger, "{}", Self::HELP_MSG);
-                outln_suc!(self.logger, "本程序相关说明及介绍视频:");
+                outln_suc!(self.logger, "本程序相关说明及介绍视频:https://www.bilibili.com/video/BV1UZbkeNEoc/?vd_source=b94494fff1b1147eb0072109b3ee55bc");
             }
             Some((full_name, short_name, detail)) => {
                 outln_log!(self.logger, "\t[{}] ({})\n\t{}", full_name, short_name, detail);
@@ -418,7 +418,7 @@ impl<'a, T: IOManager> Manager<'a, T> {
             }
             if self.file_manager.get_archive_infos()[index].get_is_favored() {
                 outln_warn!(self.logger, "存档[{}]被收藏,无法操作", index+1);
-                return Ok(());
+                continue;
             }
     
             if comfirm {    

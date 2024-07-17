@@ -3,7 +3,7 @@
 由于NoitaArchiveManager旧版本（C++版）出现了各种问题，现使用Rust重写了新版本
 ([本程序旧版本的地址](https://github.com/Xiaomony/NoitaArchiveManager))
 
-## 新版本计划开发两个版本：命令行版本和GUI版本，命令行版本已基本完成，GUI版本正在开发
+## 新版本包含两个版本：命令行版和GUI（带有图形界面）版
 
 - ## 程序说明及介绍视频
 
@@ -13,6 +13,7 @@
 - [命令说明](#命令说明)
 - [json文件的编辑与修改](#json文件的编辑与修改)
 - [实现原理](#实现原理)
+- [项目构建](#项目构建)
 
 ## 使用说明及注意事项
 
@@ -31,6 +32,10 @@
 7. 随着游戏的进行,每次存档 **所用的时间** 和 **占用的空间** 也会不断 **增大** ,请耐心等待
 
 8. **本程序的命令行版本支持 传入命令行参数**
+
+9. **使用GUI版时要注意不要同时点击一个按钮多次**
+
+10. **命令行版本与GUI版本可以共用一个Archives文件夹 但千万不要同时运行两个版本的程序**
 
 ## New Features
 
@@ -128,3 +133,23 @@
 ## 实现原理
 
 Noita会在`C:\Users\用户名\AppData\LocalLow\Nolla_Games_Noita`下存储数据，其中的`save00`文件夹为存档数据，通过复制该文件夹的内容并还原以达到存档和读档的目的
+
+## 项目构建
+
+- 命令行版本：
+
+    运行命令：
+
+    ```bat
+    cargo build -p noitarchiver_cmd --release
+    ```
+
+- GUI版本：
+
+    1. 先配置[tauri环境](https://tauri.app/zh-cn/v1/guides/getting-started/prerequisites)
+
+    2. 运行命令：
+
+    ```bat
+    cargo tauri build
+    ```
