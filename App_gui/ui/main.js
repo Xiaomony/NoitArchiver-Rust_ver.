@@ -15,25 +15,27 @@ function loadComList() {
 }
 
 function displayComInfos(comlist) {
-    window.bt_cls.innerHTML = comlist[0].breif_info;
-    window.bt_help.innerHTML = comlist[1].breif_info;
+    //let i = 0;
+    window.bt_startgame.innerHTML = comlist[0].breif_info;
+    window.bt_cls.innerHTML = comlist[1].breif_info;
+    window.bt_help.innerHTML = comlist[2].breif_info;
 
-    window.bt_save.innerHTML = comlist[3].breif_info;
-    window.bt_qsave.innerHTML = comlist[4].breif_info;
-    window.bt_rsave.innerHTML = comlist[5].breif_info;
+    window.bt_save.innerHTML = comlist[4].breif_info;
+    window.bt_qsave.innerHTML = comlist[5].breif_info;
+    window.bt_rsave.innerHTML = comlist[6].breif_info;
 
-    window.bt_load.innerHTML = comlist[6].breif_info;
-    window.bt_qload.innerHTML = comlist[7].breif_info;
+    window.bt_load.innerHTML = comlist[7].breif_info;
+    window.bt_qload.innerHTML = comlist[8].breif_info;
 
-    window.bt_ma.innerHTML = comlist[10].breif_info;
+    window.bt_ma.innerHTML = comlist[11].breif_info;
     
-    window.bt_del.innerHTML = comlist[11].breif_info;
-    window.bt_qdel.innerHTML = comlist[12].breif_info;
+    window.bt_del.innerHTML = comlist[12].breif_info;
+    window.bt_qdel.innerHTML = comlist[13].breif_info;
     
-    window.bt_favor.innerHTML = comlist[13].breif_info;
-    window.bt_unfavor.innerHTML = comlist[14].breif_info;
+    window.bt_favor.innerHTML = comlist[14].breif_info;
+    window.bt_unfavor.innerHTML = comlist[15].breif_info;
 
-    window.bt_usage.innerHTML = comlist[15].breif_info;
+    window.bt_usage.innerHTML = comlist[16].breif_info;
 }
 
 function loadArchiveInfo() {
@@ -88,6 +90,10 @@ function init_helpage() {
     } catch (error) {
         console.error("加载存档信息失败" , error);
     }
+}
+
+function opr_startgame() {
+    run_command("sg");
 }
 
 function opr_cls() {
