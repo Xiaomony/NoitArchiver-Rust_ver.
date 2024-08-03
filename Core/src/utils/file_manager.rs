@@ -74,6 +74,7 @@ pub struct FileManager<'a, T: IOManager> {
     path_to_noita_archive: PathBuf,
     path_to_archive_forlder: PathBuf,
     path_to_infos_json: PathBuf,
+    path_to_noita: PathBuf,
 
     logger: &'a T,
 }
@@ -134,14 +135,17 @@ impl<'a, T: IOManager> FileManager<'a, T> {
         let arch_path = Self::get_noita_arch_path()
             .with_msg("获取Noita存档路径失败,请检查Noita是否安装")?;
         let path_to_infos_json = PathBuf::from("./Archives/infos.json");
+        let path_to_noita = PathBuf::from("");
         let mut newone = Self {
             json_manager: JsonManager::new(path_to_infos_json.clone(), logger),
             path_to_noita_archive: arch_path,
             path_to_archive_forlder: PathBuf::from("./Archives"),
             path_to_infos_json,
+            path_to_noita,
             logger,
         };
         newone.init()?;
+        newone.load_noita_path()?;
         newone.json_manager.load_json()?;
         Ok(newone)
     }
@@ -154,6 +158,21 @@ impl<'a, T: IOManager> FileManager<'a, T> {
         }
         Ok(())
     }
+    pub fn load_noita_path(&mut self) -> Result<(), Error> {
+        let noita_path_txt = Path::new("./Archives/noita_path.txt");
+        if !noita_path_txt.exists() {
+            File::create(noita_path_txt).with_moreinfo("创建./Archives/noita_path.txt文件（用于程序内直接启动noita的功能）失败")?;
+        } else {
+            let mut f = File::open(noita_path_txt).with_moreinfo("打开./Archives/noita_path.txt失败")?;
+            let mut content: String = String::new();
+            f.read_to_string(&mut content).with_moreinfo("读取./Archives/noita_path.txt失败")?;
+            let path_to_noita = PathBuf::from(content);
+            if path_to_noita.exists() {
+                self.path_to_noita = path_to_noita;
+            }
+        }
+        Ok(())
+    }
     fn get_noita_arch_path() -> Result<PathBuf, Error> {
         if let Some(appdata) = dirs::data_local_dir() {
             let locallow_path = appdata.parent().unwrap().join("LocalLow/Nolla_Games_Noita/save00");
@@ -162,7 +181,13 @@ impl<'a, T: IOManager> FileManager<'a, T> {
             Err(Error::GeneralError("".to_string()))
         }
     }
-
+    #[inline]
+    pub fn get_noita_path(&self) -> Option<PathBuf> {
+        if self.path_to_noita.as_os_str().is_empty() {
+            return None;
+        }
+        Some(self.path_to_noita.clone())
+    }
     #[inline]
     pub fn get_archive_infos(&self) -> &Vec<ArchiveInfo> {
         self.json_manager.get_archive_infos()

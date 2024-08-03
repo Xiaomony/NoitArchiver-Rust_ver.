@@ -34,6 +34,8 @@ impl Analyzer {
         let mut addcom = |full_name, short_name, id, breif_info, detail| {
             comlist.push(ComMap::new(full_name, short_name, id, breif_info, detail));
         };
+        addcom("startgame", "sg", IdStartGame, "启动Noita\t",
+            "启动游戏（请编辑Archives文件夹下的gamepath.txt文件，设置Noita的路径）\n\t如果在Steam未启动时使用此命令，会无法加载Steam中的模组和存档\n\t查看noita路径：Steam库中Noita界面 -> 右边的小齿轮图标 -> 管理 -> 浏览本地文件");
         addcom("clear", "cls", IdClear, "清屏\t\t",
             "清除屏幕");
         addcom("help", "h", IdHelp(None), "帮助及注意事项\t",

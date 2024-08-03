@@ -7,6 +7,7 @@ use utils::io_manager::*;
 
 use chrono::prelude::*;
 use std::ops::RangeInclusive;
+use std::process::Command;
 
 pub struct Manager<'a, T: IOManager> {
     com_analyzer: com_analyzer::Analyzer,
@@ -46,6 +47,7 @@ impl<'a, T: IOManager> Manager<'a, T> {
         let getlen = || self.file_manager.get_archive_infolen() as i32;
 
         match id {
+            IdStartGame => { self.startgame() },
             IdClear => self.clear(),
             IdHelp(ref opt) => self.help(opt),
             IdQuit => self.quit(),
@@ -67,6 +69,25 @@ impl<'a, T: IOManager> Manager<'a, T> {
             IdUnfavor(opt) => self.favor(opt, false),
             IdUsage => self.usage(),
         }?;
+        Ok(())
+    }
+
+    fn startgame(&mut self) -> Result<(), Error> {
+        self.file_manager.load_noita_path()?;
+        let noita_path_opt = self.file_manager.get_noita_path();
+        if noita_path_opt == None {
+            outln_err!(self.logger, "请在Archives文件夹下的noita_path.txt中输入正确的Noita.exe的路径");
+        } else {
+            let noita_path = noita_path_opt.unwrap();
+            outln_warn!(self.logger, "如果在Steam未启动时使用此命令，会无法加载Steam中的模组和存档（若Steam已启动，请忽略此提示）");
+            let dir_path = noita_path.parent().unwrap();
+            Command::new("cmd")
+                .arg("/C")
+                .arg(&noita_path)
+                .current_dir(dir_path)
+                .spawn()
+                .expect("启动noita失败");
+        }
         Ok(())
     }
 

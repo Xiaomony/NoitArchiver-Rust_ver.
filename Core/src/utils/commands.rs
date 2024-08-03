@@ -4,6 +4,7 @@ use serde::Serialize;
 
 #[derive(Debug, Clone, Serialize)]
 pub enum CommandID {
+    IdStartGame,
     IdClear,
     IdHelp(Option<(String, String, String)>),
     IdQuit,
