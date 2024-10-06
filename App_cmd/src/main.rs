@@ -1,6 +1,7 @@
 #[macro_use(out, outln_err, outln_warn)]
 //out_err, out_log, out_suc, out_warn, outln, outln_log, outln_suc
 extern crate noitarchiver_core;
+
 use noitarchiver_core::utils::io_manager::IOManager;
 use noitarchiver_core::Manager;
 
@@ -31,7 +32,19 @@ fn main() {
 
     let args:Vec<String> = std::env::args().collect();
     if args.len() > 1 {
-        let combined_args:Vec<String> = args.into_iter().skip(1).collect();
+        let mut combined_args:Vec<String> = args.into_iter().skip(1).collect();
+        // combined_args = combined_args.into_iter().map(|mut item| {
+        //     if let Some(_) = item.find(' ') {
+        //         item=format!("\"{}\"", item);
+        //     }
+        //     item
+        // }).collect();
+        combined_args.iter_mut().for_each(|item|{
+            if let Some(_) = item.find(' ') {
+                item.insert(0, '"');
+                item.push('"');
+            }
+        });
         let combined_str = combined_args.join(" ");
         if let Err(e) = manager.run_command(&combined_str) {
             outln_err!(logger, "{}", e);
